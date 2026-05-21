@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CryOS Station</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --ice-blue: #00d4ff;
+      --deep-frost: #0a1628;
+      --glacial: #e8f4fc;
+      --cryo-glow: #00ffcc;
+      --surface: #1a2942;
+      --surface-light: #243652;
+    }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--deep-frost);
+      color: var(--glacial);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .titlebar {
+      height: 32px;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 8px;
+      -webkit-app-region: drag;
+    }
+    .titlebar-controls { display: flex; -webkit-app-region: no-drag; }
+    .titlebar-btn {
+      width: 46px; height: 32px; border: none; background: transparent;
+      color: var(--glacial); font-size: 10px; cursor: pointer;
+    }
+    .titlebar-btn:hover { background: var(--surface-light); }
+    .titlebar-btn.close:hover { background: #e81123; }
+    
+    .container { flex: 1; display: flex; overflow: hidden; }
+    
+    .sidebar {
+      width: 64px; background: var(--surface); display: flex;
+      flex-direction: column; align-items: center; padding: 16px 0; gap: 8px;
+    }
+    .sidebar-btn {
+      width: 48px; height: 48px; border: none; background: transparent;
+      color: var(--glacial); border-radius: 12px; cursor: pointer; font-size: 20px;
+    }
+    .sidebar-btn:hover { background: var(--surface-light); }
+    .sidebar-btn.active { background: var(--ice-blue); color: var(--deep-frost); }
+    
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    
+    .header {
+      height: 56px; background: var(--surface); display: flex;
+      align-items: center; justify-content: space-between; padding: 0 24px;
+    }
+    .balance-label { font-size: 11px; opacity: 0.6; }
+    .balance-amount { font-size: 18px; font-weight: 600; color: var(--ice-blue); }
+    .header-actions { display: flex; gap: 12px; }
+    .action-btn {
+      padding: 8px 16px; border: 1px solid var(--ice-blue); background: transparent;
+      color: var(--ice-blue); border-radius: 8px; cursor: pointer; font-size: 13px;
+    }
+    .action-btn:hover { background: var(--ice-blue); color: var(--deep-frost); }
+    .action-btn.primary { background: var(--ice-blue); color: var(--deep-frost); }
+    
+    .content { flex: 1; padding: 24px; overflow-y: auto; }
+    
+    .card {
+      background: var(--surface); border-radius: 16px; padding: 20px; margin-bottom: 16px;
+    }
+    .card-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+    }
+    .card-title { font-size: 16px; font-weight: 600; }
+    .card-action { font-size: 13px; color: var(--ice-blue); cursor: pointer; }
+    
+    .address-display {
+      font-family: monospace; font-size: 13px; background: var(--deep-frost);
+      padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; gap: 12px;
+    }
+    .address { flex: 1; word-break: break-all; }
+    .copy-btn { background: transparent; border: none; color: var(--ice-blue); cursor: pointer; }
+    
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    
+    .app-card {
+      background: var(--surface); border-radius: 12px; padding: 16px;
+      display: flex; gap: 12px; cursor: pointer;
+    }
+    .app-icon {
+      width: 48px; height: 48px; background: var(--surface-light); border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 24px;
+    }
+    .app-info h4 { margin-bottom: 4px; font-size: 14px; }
+    .app-info p { font-size: 12px; opacity: 0.6; }
+    
+    .empty-state { text-align: center; padding: 48px; opacity: 0.6; }
+    .empty-state h3 { margin-bottom: 8px; font-weight: normal; }
+  </style>
+</head>
+<body>
+  <div class="titlebar">
+    <span>CryOS Station</span>
+    <div class="titlebar-controls">
+      <button class="titlebar-btn" onclick="window.station.minimize()">─</button>
+      <button class="titlebar-btn" onclick="window.station.maximize()">□</button>
+      <button class="titlebar-btn close" onclick="window.station.close()">×</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <nav class="sidebar">
+      <button class="sidebar-btn active" data-view="dashboard" onclick="navigate('dashboard')">🏠</button>
+      <button class="sidebar-btn" data-view="wallet" onclick="navigate('wallet')">💰</button>
+      <button class="sidebar-btn" data-view="apps" onclick="navigate('apps')">📱</button>
+      <button class="sidebar-btn" data-view="messages" onclick="navigate('messages')">💬</button>
+      <button class="sidebar-btn" data-view="settings" onclick="navigate('settings')">⚙️</button>
+    </nav>
+
+    <main class="main">
+      <header class="header">
+        <div>
+          <span class="balance-label">Total Balance</span>
+          <br><span class="balance-amount" id="total-balance">0.00 CRX</span>
+        </div>
+        <div class="header-actions">
+          <button class="action-btn" onclick="alert('Send: Coming soon')">Send</button>
+          <button class="action-btn" onclick="navigate('wallet')">Receive</button>
+        </div>
+      </header>
+
+      <div class="content" id="content"></div>
+    </main>
+  </div>
+
+  <script>
+    let currentView = 'dashboard';
+    const wallet = { address: '0x0000...0000', balance: 0 };
+    
+    async function init() {
+      window.station.onNavigate(v => navigate(v));
+      render();
+    }
+    
+    function navigate(view) {
+      currentView = view;
+      document.querySelectorAll('.sidebar-btn').forEach(b => 
+        b.classList.toggle('active', b.dataset.view === view));
+      render();
+    }
+    
+    function render() {
+      const c = document.getElementById('content');
+      switch(currentView) {
+        case 'dashboard':
+          c.innerHTML = `<div class="grid"><div class="card"><h3 class="card-title">Quick Actions</h3><p style="margin-top:12px">Welcome to CryOS Station!</p><button class="action-btn" style="margin-top:12px">Connect Wallet</button></div><div class="card"><h3 class="card-title">Recent</h3><div class="empty-state"><h3>No activity</h3></div></div></div>`;
+          break;
+        case 'wallet':
+          c.innerHTML = `<div class="card"><h3 class="card-title">Address</h3><div class="address-display" style="margin-top:12px"><span class="address">${wallet.address}</span><button class="copy-btn" onclick="navigator.clipboard.writeText('${wallet.address}')">Copy</button></div></div><div class="card"><h3 class="card-title">Balance</h3><span class="balance-amount" style="margin-top:12px;display:block">${wallet.balance} CRX</span></div>`;
+          break;
+        case 'apps':
+          c.innerHTML = `<div class="card"><h3 class="card-title">Installed Apps</h3><div class="empty-state"><h3>No apps</h3><p>Visit CryoStore</p></div></div>`;
+          break;
+        case 'messages':
+          c.innerHTML = `<div class="card"><h3 class="card-title">Messages</h3><div class="empty-state"><h3>No messages</h3><p>P2P encrypted</p></div></div>`;
+          break;
+        case 'settings':
+          c.innerHTML = `<div class="card"><h3 class="card-title">Settings</h3><p style="margin-top:12px;opacity:0.6">CryOS Station v0.1.0</p></div>`;
+          break;
+      }
+    }
+    
+    init();
+  </script>
+</body>
+</html>
