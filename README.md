@@ -1,9 +1,5 @@
 # CryOS - Web3-Native Operating System
 
-<p align="center">
-  <img src="docs/assets/cryos-logo.png" alt="CryOS Logo" width="200"/>
-</p>
-
 **Financial sovereignty embedded directly in the kernel.**
 
 CryOS is a decentralized operating system that brings blockchain-native identity, Zero-Knowledge security, and AI-driven adaptive interfaces to desktop and mobile environments.
@@ -69,10 +65,16 @@ Build an operating system where:
 
 ## 📖 Documentation
 
-- [Whitepaper](docs/whitepaper.md)
-- [Roadmap](.agents_tmp/PLAN.md)
-- [Developer Docs](docs/)
-- [API Reference](docs/api/)
+- [Whitepaper](docs/WHITEPAPER.md)
+- [API Reference](docs/API.md)
+- [Developer Docs](docs/README.md)
+- [Status & Roadmap](docs/STATUS.md)
+
+## 🔗 Quick Links
+
+- [GitHub](https://github.com/pierrepriv99-ops/Cey)
+- [Discord](https://discord.gg/cryos)
+- [Website](https://cryos.io)
 
 ## 🤝 Contributing
 
@@ -90,7 +92,7 @@ This is experimental software. Use at your own risk. Cryptocurrencies involve ri
 
 ## 📜 License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT License
 
 ---
 
