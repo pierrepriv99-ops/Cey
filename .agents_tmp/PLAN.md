@@ -320,53 +320,1397 @@ model Order {
 ```
 
 ### Step 0.1.4: Authentication Implementation
-- **Methode**: NextAuth.js v5 mit Custom Providers
-- **Deliverable**: Vollständiges Auth System
-- **Aufwand**: 1-2 Wochen
+- **Methode**: NextAuth.js v5 mit Custom Providers + Prisma Adapter
+- **Deliverable**: Vollständiges Auth System mit allen Security Features
+- **Aufwand**: 2-3 Wochen
 - **Referenz**: /website/src/lib/auth
 
-**Login Methoden:**
-1. **Email/Password** - Traditionell mit bcrypt hashing
-2. **Wallet Connect** - Metamask, Rainbow, Coinbase Wallet
-3. **OAuth** - Google, GitHub, Discord
-4. **Social** - Magic Link (optional)
+**Komplette Auth Architektur:**
+
+```
+/src/lib/auth/
+├── config.ts              # NextAuth Configuration
+├── providers/
+│   ├── credentials.ts    # Email/Password Provider
+│   ├── wallet.ts        # Wallet Connect Provider
+│   ├── google.ts        # Google OAuth
+│   ├── github.ts       # GitHub OAuth
+│   └── discord.ts     # Discord OAuth
+├── guards/
+│   ├── jwt-guard.ts    # JWT Session Guard
+│   ├── wallet-guard.ts # Wallet Signature Guard
+│   └──2fa-guard.ts    # Two-Factor Guard
+├── utils/
+│   ├── crypto.ts       # Password Hashing (bcrypt/argon2)
+│   ├── tokens.ts       # JWT Token Helpers
+│   ├── otp.ts         # TOTP Generator für 2FA
+│   └── session.ts      # Session Management
+└── middleware.ts       # Auth Middleware
+```
+
+**Login Methoden (detailed):**
+
+| Methode | Implementation | Security Level |
+|---------|----------------|-----------------|
+| **Email/Password** | bcrypt hash (cost: 12), rate limiting, account lockout | HIGH |
+| **Wallet Connect** | SIWE (Sign-In with Ethereum), EIP-4361 | VERY HIGH |
+| **OAuth - Google** | PKCE flow, JWT tokens | HIGH |
+| **OAuth - GitHub** | PKCE flow, org restrictions optional | HIGH |
+| **OAuth - Discord** | Guild membership check optional | MEDIUM |
+| **Magic Link** | Passwordless via email (optional) | MEDIUM |
+
+**Security Features:**
+
+```typescript
+// Password Requirements
+const passwordRequirements = {
+  minLength: 12,
+  requireUppercase: true,
+  requireLowercase: true,
+  requireNumbers: true,
+  requireSymbols: true,
+  requireNoCommonWords: true,
+  requireNoRecentPasswords: 5,
+  maxAge: 90 days
+};
+
+// Account Lockout Policy
+const lockoutPolicy = {
+  maxAttempts: 5,
+  windowDuration: 15 minutes,
+  lockoutDuration: 30 minutes,
+  progressiveLockout: true // increases duration
+};
+
+// Session Settings
+const sessionSettings = {
+  jwtExpiry: 15 minutes,
+  refreshTokenExpiry: 7 days,
+  absoluteSessionTimeout: 24 hours,
+  concurrentSessions: 3,
+  deviceTracking: true
+};
+```
+
+**Complete Auth Flow (Email/Password):**
+
+```
+1. User enters email/password
+2. Validate email format + password requirements
+3. Check rate limit (prevent brute force)
+4. Lookup user in database
+   - If not exists: Show generic error (account enumeration prevention)
+5. Compare password hash (bcrypt)
+6. If successful:
+   - Generate JWT access token (15min)
+   - Generate refresh token (7 days)
+   - Create session record
+   - Set cookies (httpOnly, secure, sameSite=strict)
+   - Log authentication event
+7. If failed:
+   - Increment failed attempts
+   - If max attempts reached: Lock account
+   - Log failed attempt
+```
+
+**Complete Auth Flow (Wallet Connect):**
+
+```
+1. User clicks "Connect Wallet"
+2. Prompt MetaMask/Coinbase connection
+3. Request account address
+4. Generate nonce (cryptographically random)
+5. Construct SIWE message:
+   "Welcome to CryoHQ!\n\nNonce: {nonce}\nURI: {uri}\nVersion: 1\nChain ID: {chainId}"
+6. Request signature from wallet
+7. Verify signature locally (ecrecover)
+8. Lookup/Create user by wallet address
+9. Issue session tokens
+10. Store linked wallet address
+```
+
+**Two-Factor Authentication (TOTP):**
+
+```typescript
+interface TwoFactorSetup {
+  // Step 1: Generate secret
+  secret: generateTOTPSecret({ issuer: "CryoHQ", length: 20 })
+  
+  // Step 2: Generate QR code for authenticator apps
+  qrCode: await generateQRCode({
+    secret,
+    issuer: "CryoHQ",
+    account: user.email
+  })
+  
+  // Step 3: User enters code to verify
+  verified: verifyTOTP(userInput, secret)
+  
+  // Step 4: Store encrypted secret
+  encryptedSecret: encrypt(secret, user.keyEncryptionKey)
+}
+```
+
+**OAuth Implementation (Google Example):**
+
+```typescript
+// Google OAuth Config
+const googleProvider = {
+  id: "google",
+  name: "Google",
+  type: "oauth",
+  scope: [
+    "openid",
+    "email",
+    "profile",
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile"
+  ],
+  params: { grant_type: "authorization_code" },
+  
+  // RBX OAuth Callback Handler
+  async profile(profile) {
+    // Extract and normalize profile
+    return {
+      id: profile.sub,
+      email: profile.email,
+      emailVerified: profile.email_verified,
+      name: profile.name,
+      picture: profile.picture,
+      locale: profile.locale
+    }
+  }
+}
+
+// Authorization URL Construction (PKCE)
+const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth")
+authUrl.searchParams.set("client_id", GOOGLE_CLIENT_ID)
+authUrl.searchParams.set("redirect_uri", `${APP_URL}/api/auth/callback/google`)
+authUrl.searchParams.set("response_type", "code")
+authUrl.searchParams.set("scope", scopes.join(" "))
+authUrl.searchParams.set("state", csrfToken)
+authUrl.searchParams.set("code_challenge", pkceChallenge)
+authUrl.searchParams.set("code_challenge_method", "S256")
+```
+
+**Middleware Protection:**
+
+```typescript
+// next-auth.d.ts extension
+import { DefaultSession } from "next-auth"
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string
+      wallets: string[]
+      twoFactorEnabled: boolean
+      role: "user" | "admin" | "moderator"
+    } & DefaultSession["user"]
+  }
+}
+
+// Route Protection Examples
+const protectedRoutes = [
+  "/dashboard/:path*",
+  "/purchase/:path*",
+  "/settings/:path*"
+]
+
+const adminRoutes = [
+  "/admin/:path*"
+]
+```
+
+**Password Reset Flow:**
+
+```
+1. User enters email
+2. Generate reset token (cryptographically random, expiry: 1 hour)
+3. Send reset link via email (resend/sendgrid)
+4. User clicks link
+5. Verify token validity and expiry
+6. User enters new password
+7. Validate password requirements
+8. Update password hash
+9. Invalidate all existing sessions
+10. Send notification email
+```
+
+**Webhook Events:**
+
+```typescript
+const authWebhookEvents = {
+  "auth.login": { userId, method, ip, timestamp }
+  "auth.register": { userId, email, ip, timestamp }
+  "auth.logout": { userId, sessionId }
+  "auth.password_reset": { userId, timestamp }
+  "auth.account_locked": { userId, reason }
+  "auth.account_unlocked": { userId }
+  "auth.2fa_enabled": { userId, method }
+  "auth.2fa_disabled": { userId }
+}
+```
+
+---
 
 ### Step 0.1.5: Download Manager
-- **Methode**: AWS S3/CDN + Serverless Functions
-- **Deliverable**: Download Tracking, Version Control
-- **Aufwand**: 1 Woche
-- **Referenz**: /website/src/components/download
+- **Methode**: AWS S3 + CloudFront CDN + Lambda Edge Functions
+- **Deliverable**: Enterprise Download Management System
+- **Aufwand**: 2 Wochen
+- **Referenz**: /website/src/lib/downloads
 
-**Features:**
-- Versionierte Downloads (v1.0.0, v1.0.1, etc.)
-- SHA256/PGP Signatur Verifikation
-- Download Counter Analytics
-- Update Notification System
+**Komplette Download Architektur:**
 
-### Step 0.1.6: Purchase Engine
-- **Methode**: Stripe + Custom Smart Contract Listener
-- **Deliverable**: Token Sale Integration
+```
+/src/lib/downloads/
+├── config.ts              # CDN Configuration
+├── s3-client.ts        # S3 Client Wrapper
+├── version-manager.ts   # Version Control System
+├── signing.ts         # Pre-signed URL Generator
+├── analytics.ts       # Download Analytics
+├── verify.ts         # File Integrity Verification
+├── notifications.ts # Update Notifications
+└── api/
+    ├── list.ts       # List Downloads API
+    ├── get.ts        # Get Download API
+    ├── upload.ts     # Admin Upload API
+    └── webhooks.ts  # Storage Webhooks
+```
+
+**Download Asset Types:**
+
+| Asset Type | Format | Max Size | CDN Cache |
+|------------|--------|---------|----------|
+| Android APK | .apk | 500MB | 1 hour |
+| Android APK Bundle | .aab | 500MB | 1 hour |
+| Desktop ISO | .iso | 4GB | 24 hours |
+| Desktop IMG | .img | 4GB | 24 hours |
+| SDK Package | .tar.gz | 1GB | 24 hours |
+| Source Code | .zip | 100MB | 24 hours |
+| PGP Signatures | .asc | - | 1 hour |
+| SHA256 Checksums | .sha256 | - | 1 hour |
+
+**Version Management:**
+
+```typescript
+// version-manager.ts
+interface DownloadVersion {
+  id: string
+  version: string           // semver: "1.0.0"
+  assetType: AssetType
+  releaseDate: Date
+  releaseChannel: "stable" | "beta" | "alpha" | "nightly"
+  changelog: string        // Markdown links
+  minimumOsVersion?: string
+  
+  // File Information
+  fileSize: number
+  sha256: string          // SHA256 hash
+  pgpSignature?: string   // PGP signature path
+  
+  // Metadata
+  downloads: number
+  popularity: number      // For sorting
+  
+  // Requirements
+  systemRequirements?: {
+    os: string
+    ram: string
+    storage: string
+    processor: string
+  }
+  
+  // Breaking Changes
+  migrationGuide?: string
+  deprecationWarning?: string
+}
+
+// API Response
+interface DownloadsResponse {
+  latestStable: DownloadVersion[]
+  latestBeta: DownloadVersion[]
+  allVersions: DownloadVersion[]
+  recommendedForDevice: DownloadVersion
+}
+```
+
+**Signed URL Generation:**
+
+```typescript
+// S3 Pre-signed URL for secure downloads
+async function generateDownloadUrl(
+  downloadId: string,
+  options: {
+    expiresIn: number      // seconds, max 3600 (1 hour)
+    ipRestriction?: string // Optional IP whitelist
+    contentDisposition?: string // "attachment" for downloads
+  }
+): Promise<{
+  url: string
+  expiresAt: Date
+  metadata: DownloadVersion
+}> {
+  // 1. Get download metadata from database
+  const download = await db.downloads.findUnique({ where: { id: downloadId }})
+  
+  // 2. Validate download exists and is public
+  if (!download || !download.isPublished) {
+    throw new Error("Download not found")
+  }
+  
+  // 3. Generate pre-signed URL
+  const url = await s3.getSignedUrl("getObject", {
+    Bucket: process.env.CRYOS_DOWNLOADS_BUCKET,
+    Key: `${download assetType}/${download.filename}`,
+    Expires: options.expiresIn,
+    ResponseContentDisposition: `attachment; filename="${download.filename}"`
+  })
+  
+  // 4. Track download for analytics
+  await analytics.track({
+    action: "download_initiated",
+    downloadId,
+    timestamp: new Date()
+  })
+  
+  // 5. Return URL with metadata
+  return {
+    url,
+    expiresAt: new Date(Date.now() + options.expiresIn * 1000),
+    metadata: download
+  }
+}
+```
+
+**File Integrity Verification:**
+
+```typescript
+// verify.ts - Client-side verification helper
+interface DownloadVerification {
+  // SHA256
+  sha256: {
+    command: "sha256sum -c file.sha256",
+    offlineCommand: "certutil -hashfile file.apk SHA256",
+    expectedValue: "abc123..." // Pre-computed
+  }
+  
+  // GPG (optional, recommended)
+  gpg: {
+    signatureFile: "cryos-x.x.x.apk.asc",
+    publicKey: "cryohq.pub",
+    verifyCommand: "gpg --verify file.s.apk.asc file.apk",
+    fingerprint: "CryoHQ <keys@cryohq.io>"
+  }
+}
+
+// Example client-side script (PowerShell)
+// Verify-Download.ps1
+param([string]$FilePath, [string]$ExpectedHash)
+$actualHash = (Get-FileHash -Algorithm SHA256 -Path $FilePath).Hash.ToLower()
+if ($actualHash -ne $expectedHash.ToLower()) {
+  Write-Error "Hash mismatch! File may be corrupted."
+  exit 1
+}
+Write-Host "✓ Download verified successfully"
+```
+
+**Update Checker:**
+
+```typescript
+// auto-update-checker.ts
+interface UpdateCheckerConfig {
+  currentVersion: string
+  platform: "android" | "windows" | "macos" | "linux"
+  channel: "stable" | "beta" | "alpha"
+  
+  // Check frequency (don't check too often)
+  checkInterval: 6 hours
+  
+  // Background check settings
+  backgroundCheck: true
+  notifyOnStable: true
+  notifyOnBeta: false
+  autoDownload: false // Don't auto-download by default
+}
+
+interface UpdateCheckResult {
+  updateAvailable: boolean
+  latestVersion: string
+  releaseNotes: string
+  mandatoryUpdate: boolean // Can't skip
+  downloadUrl: string
+  estimatedSize: number
+  releaseDate: Date
+}
+```
+
+**Admin Upload Flow:**
+
+```typescript
+// Admin upload to S3
+async function uploadNewVersion(
+  adminId: string,
+  file: File,
+  metadata: UploadMetadata
+): Promise<{
+  version: string
+  downloadId: string
+  uploadUrl: string // For direct upload
+}> {
+  // 1. Verify admin permissions
+  await verifyAdminRole(adminId)
+  
+  // 2. Validate file
+  validateFile(file, {
+    maxSize: getMaxSize(metadata.assetType),
+    allowedExtensions: getAllowedExtensions(metadata.assetType)
+  })
+  
+  // 3. Generate version number (auto-increment)
+  const version = await versionManager.incrementVersion({
+    currentVersion: metadata.parentVersion,
+    bumpType: metadata.bumpType // patch | minor | major
+  })
+  
+  // 4. Calculate checksums
+  const checksums = await calculateChecksums(file)
+  
+  // 5. Create database record
+  const download = await db.download.create({
+    data: {
+      ...metadata,
+      version,
+      sha256: checksums.sha256,
+      size: file.size,
+      status: "pending_review"
+    }
+  })
+  
+  // 6. Generate upload URL (direct to S3)
+  const uploadUrl = await generateUploadUrl(download, {
+    contentType: file.type,
+    expiresIn: 3600
+  })
+  
+  // 7. Send to review queue
+  await notifyAdmins("New download uploaded", download)
+  
+  return { version, downloadId: download.id, uploadUrl }
+}
+```
+
+**Download Analytics:**
+
+```typescript
+// Analytics tracked
+interface DownloadAnalytics {
+  // Per download
+  downloadId: string
+  totalDownloads: number
+  byPlatform: Record<string, number>
+  byRegion: Record<string, number>
+  byDay: Record<string, number>
+  
+  // Per version
+  uniqueUsers: number
+  failedDownloads: number
+  averageSpeed: number // KB/s
+  averageTime: number // seconds
+}
+```
+
+---
+
+### Step 0.1.6: Purchase Engine (Full Implementation)
+- **Methode**: Stripe + Custom Payment Processor + Smart Contract Integration
+- **Deliverable**: Vollständige Kaufabwicklung für Token & Produkte
+- **Aufwand**: 2-3 Wochen
+- **Referenz**: /website/src/lib/purchase
+
+**Purchase Engine Architektur:**
+
+```
+/src/lib/purchase/
+├── config.ts              # Payment Configuration
+├── payment-processor.ts  # Abstract Payment Processor
+├── stripe-processor.ts   # Stripe Integration
+├── crypto-processor.ts # Cryptocurrency Processor
+├── moonpay-processor.ts # Fiat On-Ramp
+├── order-manager.ts     # Order State Machine
+├── pricing-engine.ts # Dynamic Pricing
+├── kyc-service.ts    # KYC/AML Integration
+├── invoice-generator.ts # Invoice PDF Generator
+├── webhook-handler.ts # Payment Webhooks
+└── api/
+    ├── create-order.ts   # Create Order API
+    ├── get-order.ts   # Get Order Details
+    ├── verify-payment.ts # Verify Payment
+    ├── cancel-order.ts # Cancel Order
+    ├── refund.ts     # Process Refund
+    └── webhook.ts    # Webhook Handler
+```
+
+**Order State Machine:**
+
+```
+CREATED ──────────────────► AWAITING_PAYMENT
+         │                        │
+         │ (payment initiated  │ (timeout:
+         │  by user)        │  30 min)
+         ▼                        ▼
+    PROCESSING ◄───────────── FAILED
+         │
+         │ (payment confirmed)
+         ▼
+      COMPLETED ────────────────► REFUNDED
+         │
+         │ (user requests)
+         ▼
+      REFUND_PROCESSING
+         │
+         │ (refund complete)
+         ▼
+       REFUNDED
+```
+
+**Payment Methods (Detailed):**
+
+| Method | Supported Currencies | Fees | Processing Time | Limits |
+|---------|-----------------|------|-------------|-------|
+| **Credit Card** (Stripe) | USD, EUR, GBP | 2.9% + $0.30 | Instant | $10 - $10,000 |
+| **Crypto - ETH** | ETH, USDC | 1% | ~15 min (confirmations) | No limits |
+| **Crypto - BTC** | BTC | 1% | ~30 min | No limits |
+| **MoonPay** | USD, EUR | 2.5% | 10-30 min | $20 - $5,000 |
+| **Bank Wire** (Enterprise) | USD, EUR | Flat $25 | 2-5 business days | Min $5,000 |
+
+**Create Order Flow:**
+
+```typescript
+interface CreateOrderRequest {
+  productType: "crx_tokens" | "merchandise" | "premium_feature"
+  quantity: number        // Token amount OR merchandise quantity
+  paymentMethod: PaymentMethod
+  currency: string      // USD, EUR, CRX, ETH, BTC
+  country: string      // For tax calculation
+  promoCode?: string
+  
+  // If merchandise
+  shippingAddress?: Address
+  
+  // KYC required for >$3,000
+  kycToken?: string
+}
+
+interface Order {
+  id: string                    // "ord_xxx"
+  orderNumber: string           // Human readable: "CRX-2024-001"
+  
+  // Customer
+  customerId: string
+  customerEmail: string
+  
+  // Product
+  productType: ProductType
+  productName: string
+  quantity: number
+  unitPrice: Price           // Price per unit
+  
+  // Pricing
+  subtotal: Money
+  discount?: Money        // Promo code discount
+  tax: Money
+  processingFee: Money   // Payment processing fee
+  total: Money
+  
+  // Payment
+  paymentMethod: PaymentMethod
+  paymentCurrency: string    // Actual payment currency
+  exchangeRate?: number   // If paying in different currency
+  
+  // Status
+  status: OrderStatus
+  createdAt: Date
+  expiresAt: Date        // 30 minutes
+  paidAt?: Date
+  completedAt?: Date
+  
+  // Transaction
+  txHash?: string        // Crypto transaction hash
+  stripePaymentIntent?: string
+  
+  // KYC
+  kycStatus: "not_required" | "pending" | "approved" | "rejected"
+  kycToken?: string
+}
+```
+
+**Stripe Integration:**
+
+```typescript
+// stripe-processor.ts
+class StripeProcessor implements PaymentProcessor {
+  // Create Payment Intent
+  async createPaymentIntent(order: Order): Promise<{
+    clientSecret: string   // For frontend
+    paymentIntentId: string
+  }> {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: order.total.amount * 100, // Stripe wants cents
+      currency: order.total.currency.toLowerCase(),
+      customer: order.customerStripeId,
+      metadata: {
+        orderId: order.id,
+        orderNumber: order.orderNumber
+      },
+      automatic_payment_methods: {
+        enabled: true
+      },
+      // 3D Secure for cards
+      setup_future_usage: "off_session"
+    })
+    
+    return {
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id
+    }
+  }
+  
+  // Verify Payment
+  async verifyPayment(paymentIntentId: string): Promise<boolean> {
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+    return paymentIntent.status === "succeeded"
+  }
+  
+  // Process Refund
+  async processRefund(orderId: string, amount?: number): Promise<{
+    refundId: string
+    status: "succeeded" | "pending" | "failed"
+  }> {
+    const order = await db.orders.findUnique({ where: { id: orderId }})
+    
+    const refund = await stripe.refunds.create({
+      payment_intent: order.stripePaymentIntent,
+      amount: amount || undefined, // Full refund if undefined
+      reason: "requested_by_customer"
+    })
+    
+    return { refundId: refund.id, status: refund.status }
+  }
+}
+```
+
+**Crypto Payment Processing:**
+
+```typescript
+// crypto-processor.ts
+class CryptoProcessor implements PaymentProcessor {
+  // Supported tokens
+  supportedTokens = {
+    eth: ["eth", "usdc", "usdt"],
+    btc: ["btc"],
+    sol: ["sol"]
+  }
+  
+  // Create crypto payment address
+  async createPayment(order: Order): Promise<{
+    address: string         // Payment address
+    amount: string         // Exact amount to send
+    currency: string      // Token
+    expiration: Date
+    qrCode: string       // For mobile
+    
+    // Monitoring
+    watchAddress: string  // Internal watch address
+  }> {
+    // 1. Get current exchange rate
+    const rate = await this.getExchangeRate(order.paymentCurrency)
+    
+    // 2. Calculate crypto amount
+    const cryptoAmount = this.convertToCrypto(order.total, rate)
+    
+    // 3. Generate or derive payment address
+    // (Use HMAC derivation from master key)
+    const { address, privateKey } = await this.derivePaymentKey(order.id)
+    
+    // 4. Set up blockchain monitor
+    await this.startWatching(address, {
+      expectedAmount: cryptoAmount,
+      token: order.paymentCurrency,
+      orderId: order.id,
+      deadline: order.expiresAt
+    })
+    
+    return {
+      address,
+      amount: cryptoAmount.toFixed(tokenDecimals),
+      currency: order.paymentCurrency,
+      expiration: order.expiresAt,
+      qrCode: this.generateQRCode(address, cryptoAmount)
+    }
+  }
+  
+  // Monitor incoming payments
+  async handleIncomingPayment(data: BlockchainData): Promise<void> {
+    // 1. Verify payment on blockchain
+    const confirmed = await this.confirmTransaction(data.txHash)
+    
+    if (!confirmed) return // Wait for confirmations
+    
+    // 2. Verify amount
+    const received = await this.getReceivedAmount(data.address)
+    const expected = data.expectedAmount
+    
+    if (received.lt(expected)) {
+      // Partial payment - notify user
+      await notifyCustomer("partial_payment", data.orderId, { received, expected })
+      return
+    }
+    
+    // 3. Mark order as paid
+    await this.markOrderPaid(data.orderId, data.txHash)
+    
+    // 4. Trigger fulfillment
+    await fulfillOrder(data.orderId)
+  }
+  
+  // Wait for confirmations before fulfilling
+  async waitForConfirmations(txHash: string, required: number): Promise<boolean> {
+    let confirmations = 0
+    
+    while (confirmations < required) {
+      await sleep(30000) // Check every 30 seconds
+      confirmations = await this.getConfirmations(txHash)
+      
+      // Timeout after 1 hour
+      if (Date.now() > timeout) return false
+    }
+    
+    return true
+  }
+}
+```
+
+**Pricing Engine:**
+
+```typescript
+// pricing-engine.ts
+class PricingEngine {
+  // Token pricing
+  async getTokenPrice(): Promise<PriceInfo> {
+    // 1. Fetch current price from DEX
+    const dexPrice = await this.fetchDEXPrice("CRX/WETH")
+    
+    // 2. Apply volume discount
+    const volumeDiscount = await this.getVolumeDiscount()
+    
+    // 3. Calculate final price
+    const basePrice = dexPrice * (1 - volumeDiscount)
+    
+    // 4. Calculate bonus tokens for payment method
+    const methodBonus = await this.getMethodBonus()
+    
+    return {
+      pricePerToken: basePrice,
+      bonusTokensPercent: methodBonus,
+      volumeDiscount: volumeDiscount * 100,
+      validUntil: Date.now() + 3600000 // 1 hour
+    }
+  }
+  
+  // Volume discounts
+  volumeTiers = [
+    { minVolume: 10000, discount: 0.10 },  // 10% off for $10k+
+    { minVolume: 50000, discount: 0.15 },  // 15% off for $50k+
+    { minVolume: 100000, discount: 0.20 }, // 20% off for $100k+
+    { minVolume: 500000, discount: 0.25 }, // 25% off for $500k+
+  ]
+  
+  // Payment method bonuses (free tokens)
+  paymentBonuses = [
+    { method: "eth", bonus: 0.05 },     // 5% bonus for ETH
+    { method: "usdc", bonus: 0.03 },    // 3% bonus for USDC
+    { method: "card", bonus: 0 },       // No bonus for card
+  ]
+}
+```
+
+**Invoice Generation:**
+
+```typescript
+// invoice-generator.ts
+interface Invoice {
+  // Header
+  invoiceNumber: string
+  issuedAt: Date
+  dueDate: Date
+  
+  // From
+  seller: BusinessInfo
+  
+  // To
+  buyer: CustomerInfo
+  billingAddress: Address
+  
+  // Line Items
+  items: InvoiceItem[]
+  
+  // Totals
+  subtotal: Money
+  tax: Money
+  total: Money
+  
+  // Payment Information
+  paymentInstructions: PaymentInstruction
+  paymentDueBy: Date
+}
+
+// Generate PDF invoice
+async function generateInvoice(order: Order): Promise<Buffer> {
+  // Use puppeteer or pdfkit to generate PDF
+  const html = await renderInvoiceTemplate(order)
+  const pdf = await html2pdf(html)
+  
+  // Or use Stripe invoice as fallback
+  const stripeInvoice = await stripe.invoices.create({
+    customer: stripeCustomerId,
+    collection_method: "send_invoice",
+    days_until_due: 0,
+    metadata: { orderId: order.id }
+  })
+  
+  return pdf
+}
+```
+
+**KYC Integration:**
+
+```typescript
+// kyc-service.ts
+class KYCService {
+  // Required for transactions over threshold
+  thresholds = {
+    usd: 3000,
+    eur: 3000,
+    eth: 2,
+    btc: 0.1
+  }
+  
+  async needsKYC(order: Order): Promise<boolean> {
+    const threshold = this.thresholds[order.total.currency]
+    return order.total.amount >= threshold
+  }
+  
+  // Submit KYC
+  async submitKYC(customerId: string, documents: KYCDocuments): Promise<{
+    status: "pending" | "approved" | "rejected"
+    checks: KYCCheck[]
+  }> {
+    // Integrate with SumSub, Jumio, or similar
+    const submission = await sumsub.createSubmission({
+      applicant: {
+        email: customer.email,
+        phone: customer.phone
+      },
+      document: {
+        idPhoto: documents.idPhoto,
+        selfPhoto: documents.selfPhoto,
+        proofOfFunds: documents.proofOfFunds
+      }
+    })
+    
+    // Return status
+    return submission.result
+  }
+  
+  // Verify KYC status
+  async verifyKYC(kycToken: string): Promise<boolean> {
+    const status = await sumsub.getStatus(kycToken)
+    return status === "approved"
+  }
+}
+```
+
+**Webhook Handler:**
+
+```typescript
+// webhook-handler.ts
+const webhookHandlers = {
+  stripe: {
+    "payment_intent.succeeded": async (event) => {
+      await markOrderPaid(event.data.metadata.orderId)
+    },
+    "payment_intent.payment_failed": async (event) => {
+      await handleFailedPayment(event.data.metadata.orderId)
+    },
+    "charge.refunded": async (event) => {
+      await processRefund(event.data.metadata.orderId)
+    }
+  },
+  
+  crypto: {
+    "payment.received": async (event) => {
+      await confirmOrderPayment(event.orderId)
+    },
+    "payment.confirmed": async (event) => {
+      await fulfillOrder(event.orderId)
+    }
+  }
+}
+```
+
+---
+
+### Step 0.1.7: Contact & Support System
+- **Methode**: Custom Ticket System + Knowledge Base + FAQ
+- **Deliverable**: Vollständiges Support-System
 - **Aufwand**: 1-2 Wochen
-- **Referenz**: /website/src/components/purchase
+- **Referenz**: /website/src/lib/support
 
-**Payment Methods:**
-- Credit Card (Stripe)
-- Crypto (ETH, USDC - direkt zum SC)
-- MoonPay (Fiat on-ramp)
-- Bank Transfer (Enterprise)
+**Support Architektur:**
 
-### Step 0.1.7: UI/UX Frost Design Implementation
-- **Methode**: Custom Tailwind Config + Framer Motion
-- **Deliverable**: Professionelles CryOS Design
-- **Aufwand**: 1-2 Wochen
+```
+/src/lib/support/
+├── config.ts              # Support Configuration
+├── ticket-manager.ts      # Ticket State Machine
+├── kb-manager.ts        # Knowledge Base
+├── ai-chatbot.ts       # AI Assistant
+├── escalation.ts       # Escalation Rules
+├── sla-monitor.ts    # SLA Monitoring
+└── api/
+    ├── create-ticket.ts # Create Ticket
+    ├── get-ticket.ts   # Get Ticket
+    ├── reply-ticket.ts # Reply to Ticket
+    ├── resolve-ticket.ts # Resolve Ticket
+    └── webhook.ts    # External Hooks
+```
+
+**Ticket System:**
+
+```typescript
+// ticket-manager.ts
+interface Ticket {
+  id: string              // "TKT-xxx"
+  ticketNumber: string     // Human readable
+  
+  // Creator
+  userId?: string         // Logged in user
+  email: string          // Email (for guests)
+  name: string
+  
+  // Category
+  category: Category
+  priority: Priority
+  subject: string
+  description: string
+  attachments?: Attachment[]
+  
+  // Status
+  status: TicketStatus   // open, pending, resolved, closed
+  assignedTo?: string  // Support agent ID
+  
+  // Communication
+  messages: Message[]
+  lastReplyAt: Date
+  
+  // SLA
+  createdAt: Date
+  firstResponseAt?: Date
+  resolvedAt?: Date
+  slaDeadline: Date
+  
+  // Feedback
+  rating?: number       // 1-5
+  feedback?: string
+}
+
+// Ticket Categories
+const categories = [
+  { id: "technical", name: "Technical Issue", slaHours: 24 },
+  { id: "billing", name: "Billing & Payments", slaHours: 12 },
+  { id: "account", name: "Account", slaHours: 24 },
+  { id: "security", name: "Security", slaHours: 4 }, // Urgent!
+  { id: "partnerships", name: "Partnerships", slaHours: 48 },
+  { id: "media", name: "Press & Media", slaHours: 48 },
+  { id: "other", name: "Other", slaHours: 48 }
+]
+
+// Priority Levels
+const priorities = [
+  { id: "critical", name: "Critical", slaHours: 4, color: "red" },
+  { id: "high", name: "High", slaHours: 12, color: "orange" },
+  { id: "medium", name: "Medium", slaHours: 24, color: "yellow" },
+  { id: "low", name: "Low", slaHours: 72, color: "green" }
+]
+```
+
+**Knowledge Base:**
+
+```typescript
+// kb-manager.ts
+interface KBArticle {
+  id: string
+  title: string
+  slug: string
+  category: string
+  tags: string[]
+  content: string     // Markdown
+  author: string
+  
+  // Metrics
+  views: number
+  helpful: number
+  notHelpful: number
+  rating: number    // Average rating
+  
+  // SEO
+  metaTitle: string
+  metaDescription: string
+  
+  // Related
+  relatedArticles: string[]
+}
+
+const kbCategories = [
+  "Getting Started",
+  "Installation",
+  "Wallet Guide",
+  "Token Guide",
+  "Security",
+  "Troubleshooting",
+  "FAQ"
+]
+```
+
+**AI Chatbot (Cryo Mind Integration):**
+
+```typescript
+// ai-chatbot.ts
+interface ChatMessage {
+  role: "user" | "assistant"
+  content: string
+  timestamp: Date
+}
+
+interface ChatSession {
+  id: string
+  messages: ChatMessage[]
+  resolved: boolean
+}
+
+// Simple rule-based responses + Knowledge Base
+async function handleChat(message: string, context: ChatContext): Promise<string> {
+  // 1. Match against Knowledge Base articles
+  const relevantArticle = await searchKB(message)
+  if (relevantArticle) {
+    return formatKBPreview(relevantArticle)
+  }
+  
+  // 2. Match against common questions
+  const faqMatch = await matchFAQ(message)
+  if (faqMatch) {
+    return faqMatch.answer
+  }
+  
+  // 3. Try intent classification
+  const intent = await classifyIntent(message)
+  
+  switch (intent) {
+    case "reset_password":
+      return "I can help you reset your password..."
+    
+    case "wallet_connection":
+      return "Having trouble connecting your wallet? Let me walk you through..."
+    
+    case "token_purchase":
+      return "To purchase CRX tokens, visit /purchase..."
+    
+    case "bug_report":
+      return return createTicketWithContext(context, "bug", message)
+    
+    default:
+      // Escalate to human
+      return createTicketSuggestion(context, message)
+  }
+}
+```
+
+**Auto-Escalation Rules:**
+
+```typescript
+// escalation.ts
+const escalationRules = [
+  { condition: "status=pending AND daysSinceLastReply>3", action: "escalate_to_agent" },
+  { condition: "priority=critical AND status=open", action: "notify_oncall" },
+  { condition: "category=security AND status=open", action: "notify_security_team" },
+  { condition: "rating<3", action: "create_feedback_ticket" },
+  { condition: "messages.length>10", action: "escalate_to_manager" }
+]
+```
+
+**SLA Monitoring:**
+
+```typescript
+// sla-monitor.ts
+interface SLAMetrics {
+  // Response times
+  avgFirstResponseTime: number      // Hours
+  firstResponseCompliance: number  // % within SLA
+  
+  // Resolution times
+  avgResolutionTime: number     // Hours
+  resolutionCompliance: number   // % within SLA
+  
+  // Satisfaction
+  avgRating: number           // Out of 5
+  npsScore: number         // Net Promoter Score
+  
+  // Tickets
+  totalTickets: number
+  openTickets: number
+  avgTicketsPerDay: number
+}
+```
+
+---
+
+### Step 0.1.8: UI/UX Frost Design Implementation
+- **Methode**: Custom Tailwind Config + Framer Motion + CSS Variables
+- **Deliverable**: Professionelles CryOS Design System
+- **Aufwand**: 2-3 Wochen
 - **Referenz**: /website/src/styles
 
-**Design System:**
-- Frost UI Tokens (Farben, Spacing, Typography)
-- Glassmorphism Komponenten
-- Ambient Glow System
-- Animation Library
-- Responsive Breakpoints
+**Design System Architektur:**
+
+```
+/src/styles/
+├── theme.ts              # Theme Configuration
+├── variables.css        # CSS Variables
+├── global.css          # Global Styles
+├── typography.ts       # Font Configuration
+├── animation.ts       # Animation Library
+└── components/
+    ├── button.ts
+    ├── input.ts
+    ├── card.ts
+    ├── modal.ts
+    └── ...
+```
+
+**Frost UI Tokens (CSS Variables):**
+
+```css
+/* theme.css */
+:root {
+  /* Brand Colors */
+  --color-primary: #00d4ff;
+  --color-primary-hover: #00b8df;
+  --color-secondary: #ff00d4;
+  --color-accent: #ffd400;
+  
+  /* Semantic Colors */
+  --color-success: #00ff88;
+  --color-warning: #ffaa00;
+  --color-error: #ff4444;
+  --color-info: #00aaff;
+  
+  /* Background */
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #12121a;
+  --bg-tertiary: #1a1a25;
+  --bg-glass: rgba(255, 255, 255, 0.05);
+  
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: 20px;
+  
+  /* Text */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-tertiary: rgba(255, 255, 255, 0.5);
+  --text-disabled: rgba(255, 255, 255, 0.3);
+  
+  /* Glow Effects */
+  --glow-primary: 0 0 20px rgba(0, 212, 255, 0.5);
+  --glow-secondary: 0 0 20px rgba(255, 0, 212, 0.5);
+  --glow-success: 0 0 20px rgba(0, 255, 136, 0.5);
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+  
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms ease;
+  --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.6);
+}
+
+/* Dark Theme (Default) */
+[data-theme="dark"] {
+  --background-primary: #0a0a0f;
+  --background-secondary: #12121a;
+  --text-primary: #ffffff;
+}
+
+/* Light Theme (Optional) */
+[data-theme="light"] {
+  --background-primary: #f5f5f7;
+  --background-secondary: #ffffff;
+  --text-primary: #1a1a1f;
+}
+```
+
+**Component Examples:**
+
+```typescript
+// Button Component
+const Button = ({ variant = "primary", size = "md", ...props }) => {
+  const variants = {
+    primary: `
+      bg-[--color-primary] 
+      hover:bg-[--color-primary-hover]
+      text-black font-semibold
+      shadow-[--glow-primary]
+    `,
+    secondary: `
+      bg-transparent 
+      border border-[--glass-border]
+      text-[--text-primary]
+      hover:bg-[--glass-bg]
+      backdrop-blur-[--glass-blur]
+    `,
+    ghost: `
+      bg-transparent 
+      text-[--text-secondary]
+      hover:text-[--text-primary]
+    `
+  }
+  
+  const sizes = {
+    sm: "px-3 py-1.5 text-sm",
+    md: "px-4 py-2 text-base",
+    lg: "px-6 py-3 text-lg"
+  }
+  
+  return (
+    <button 
+      className={`
+        rounded-[--radius-lg] 
+        transition-all duration-[--transition-base]
+        ${variants[variant]}
+        ${sizes[size]}
+      `}
+      {...props}
+    />
+  )
+}
+
+// Glass Card Component
+const GlassCard = ({ children, glow = false, ...props }) => {
+  return (
+    <div 
+      className={`
+        bg-[--glass-bg] 
+        border border-[--glass-border] 
+        rounded-[--radius-xl]
+        backdrop-blur-[--glass-blur]
+        ${glow ? "shadow-[--glow-primary]" : ""}
+      `}
+      {...props}
+    >
+      {children}
+    </div>
+  )
+}
+```
+
+**Animation Library:**
+
+```typescript
+// animation.ts
+export const animations = {
+  // Entrance animations
+  fadeIn: {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 }
+  },
+  
+  slideUp: {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 },
+    transition: { type: "spring", stiffness: 300, damping: 30 }
+  },
+  
+  scaleIn: {
+    initial: { opacity: 0, scale: 0.9 },
+    animate: { opacity: 1, scale: 1 },
+    transition: { type: "spring", stiffness: 400, damping: 25 }
+  },
+  
+  // Glow pulse for CTAs
+  glowPulse: {
+    animate: {
+      boxShadow: [
+        "0 0 20px rgba(0, 212, 255, 0.3)",
+        "0 0 40px rgba(0, 212, 255, 0.6)",
+        "0 0 20px rgba(0, 212, 255, 0.3)"
+      ]
+    },
+    transition: {
+      duration: 2,
+      repeat: Infinity,
+      ease: "easeInOut"
+    }
+  },
+  
+  // Typing effect
+  typing: {
+    animate: { width: "100%" },
+    transition: { type: "typing", speed: 50 }
+  }
+}
+```
+
+**Responsive Breakpoints:**
+
+```typescript
+// tailwind.config.ts
+export default {
+  theme: {
+    screens: {
+      "xs": "480px",    // Mobile portrait
+      "sm": "640px",    // Mobile landscape
+      "md": "768px",    // Tablet portrait
+      "lg": "1024px",   // Tablet landscape / Small desktop
+      "xl": "1280px",   // Desktop
+      "2xl": "1536px"   // Large desktop
+    }
+  }
+}
+```
 
 **Milestone Checkpoint**: ◉ Website Complete when:
 - [ ] Landing Page mit Frost UI Design
