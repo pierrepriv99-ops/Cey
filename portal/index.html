@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CryOS Developer Portal</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --ice-blue: #00d4ff;
+      --deep-frost: #0a1628;
+      --glacial: #e8f4fc;
+      --cryo-glow: #00ffcc;
+      --surface: #1a2942;
+    }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--deep-frost);
+      color: var(--glacial);
+      line-height: 1.6;
+    }
+    header {
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10, 22, 40, 0.9);
+    }
+    .logo { font-size: 1.25rem; font-weight: 700; color: var(--ice-blue); }
+    .logo span { color: var(--cryo-glow); }
+    nav a {
+      color: var(--glacial);
+      text-decoration: none;
+      margin-left: 1.5rem;
+      font-size: 0.9rem;
+    }
+    .hero {
+      padding: 6rem 2rem;
+      text-align: center;
+      background: radial-gradient(ellipse at 50% 30%, rgba(0, 212, 255, 0.1) 0%, transparent 60%);
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--ice-blue), var(--cryo-glow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      opacity: 0.8;
+    }
+    .cta-btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: var(--ice-blue);
+      color: var(--deep-frost);
+      text-decoration: none;
+      font-weight: 600;
+      border-radius: 6px;
+      margin: 0 0.5rem;
+    }
+    .cta-btn.secondary {
+      background: var(--surface);
+      color: var(--glacial);
+      border: 1px solid var(--ice-blue);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      padding: 4rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid rgba(0, 212, 255, 0.1);
+    }
+    .card h3 {
+      color: var(--ice-blue);
+      margin-bottom: 0.75rem;
+    }
+    .card p {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+    .code {
+      background: #0d1526;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin-top: 0.75rem;
+    }
+    footer {
+      padding: 3rem 2rem;
+      text-align: center;
+      border-top: 1px solid rgba(0, 212, 255, 0.1);
+      font-size: 0.85rem;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Cry<span>OS</span> Dev</div>
+    <nav>
+      <a href="#docs">Docs</a>
+      <a href="#sdk">SDK</a>
+      <a href="#store">Store</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Build the <span>Web3 Native OS</span></h1>
+    <p>SDK, APIs, and tools for building decentralized mobile apps on CryOS. Financial sovereignty in your pocket.</p>
+    <a href="#docs" class="cta-btn">Get Started</a>
+    <a href="https://github.com/pierrepriv99-ops/Cey" class="cta-btn secondary">View Source</a>
+  </section>
+
+  <section class="grid" id="docs">
+    <div class="card">
+      <h3>📱 Mobile SDK</h3>
+      <p>Build native Android apps with CryOS integration</p>
+      <pre class="code">// Kotlin
+val wallet = WalletSDK.fromPrivateKey(key)
+val balance = wallet.getBalance()</pre>
+    </div>
+    <div class="card">
+      <h3>🪙 CRX Token</h3>
+      <p>Ethereum-based utility token for CryOS ecosystem</p>
+      <pre class="code">// Transfer CRX
+sdk.transferCRX(to, amount)</pre>
+    </div>
+    <div class="card">
+      <h3>🛒 CryoStore</h3>
+      <p>Decentralized app marketplace</p>
+      <pre class="code">// Download app
+sdk.downloadApp(appId)</pre>
+    </div>
+    <div class="card">
+      <h3>🔐 CryoVault</h3>
+      <p>Hardware-backed security</p>
+      <pre class="code">// Generate key
+vault.generateMasterKey()</pre>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 CryOS Foundation · dev@cryos.io</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "@cryos/sdk",
+  "version": "0.1.0",
+  "description": "CryOS Web3 SDK",
+  "main": "dist/index.js",
+  "type": "module"
+}
