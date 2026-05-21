@@ -1,56 +1,143 @@
 # CryOS Developer Documentation
 
-## Current Status: Phase 1 - Mobile Alpha
+> The Web3-Native Operating System - Build financial sovereignty into your device.
 
-Welcome to the CryOS developer docs.
+## Current Status: Production Alpha
 
-## Project Structure
-
-```
-cryos-core/
-├── contracts/         # Smart contracts (Solidity)
-│   └── CRXToken.sol    # CRX Token Contract
-├── test/               # Tests
-├── scripts/           # Deployment scripts
-├── website/           # CryoHQ website
-└── docs/              # Developer documentation
-```
+| Component | Status |
+|-----------|--------|
+| Smart Contracts | ✅ v0.1.0 |
+| Mobile SDK | ✅ Alpha |
+| Desktop | ✅ Beta |
+| P2P Network | ✅ Alpha |
+| Mind AI | ✅ Alpha |
 
 ## Quick Start
 
 ### Prerequisites
 - Node.js 18+
 - npm or yarn
-- Hardhat (for smart contracts)
+- Android Studio (mobile)
+- Hardhat
 
-### Setup
+### Install & Build
 
 ```bash
-# Install dependencies
+# Clone
+git clone https://github.com/pierrepriv99-ops/Cey.git
+cd Cey
+
+# Install deps
 npm install
 
 # Compile contracts
-npm run compile
+npx hardhat compile
 
 # Run tests
-npm run test
+npx hardhat test
 ```
+
+---
+
+## Architecture
+
+| Layer | Location |
+|-------|----------|
+| Cryo Interface (UI) | `/website` |
+| Cryo Mind (AI) | `/mind` |
+| Cryo Mobile/Station | `/mobile`, `/desktop` |
+| Cryo Chain | `/contracts` |
+| Cryo Vault | `/mobile` |
+| Cryo Network | `/network` |
+
+---
 
 ## Smart Contracts
 
 ### CRXToken
-
-The CRX token is an ERC-20 token with the following features:
-
 - **Name**: CryOS Token
 - **Symbol**: CRX
-- **Decimals**: 18
-- **Max Supply**: 21,000,000 CRX
+- **Supply**: 21,000,000 max
+- **Standard**: ERC-20
 
-Key functions:
-- `mint(address to, uint256 amount)` - Only owner can mint
-- `burn(uint256 amount)` - Anyone can burn their tokens
-- `circulatingSupply()` - Returns current supply
+```solidity
+// Key functions
+mint(address to, uint256 amount);
+burn(uint256 amount);
+transfer(address to, uint256 amount);
+```
+
+### CryoStore
+- App registration & publishing
+- Revenue distribution
+
+---
+
+## SDK
+
+### TypeScript
+```bash
+npm install @cryos/sdk
+```
+
+### Android
+```kotlin
+implementation 'io.cryosdk:mobile:0.1.0'
+```
+
+---
+
+## Mobile (8 chains)
+1. Ethereum
+2. Polygon
+3. BSC
+4. Avalanche
+5. Arbitrum
+6. Optimism
+7. Solana (soon)
+8. Aptos (soon)
+
+---
+
+## Desktop
+- Electron app
+- Ubuntu 20.04+, macOS 12+
+- Frameless window + Frost UI
+- System tray
+
+---
+
+## P2P Network
+- libp2p mesh
+- Double Ratchet encryption
+- NAT traversal
+
+---
+
+## Mind AI
+```bash
+cryos-mind "send 50 CRX to vault"
+```
+
+---
+
+## API
+
+| Endpoint | Method |
+|-----------|--------|
+| `/api/v1/auth/login` | POST |
+| `/api/v1/wallet/balance` | GET |
+| `/api/v1/transaction/send` | POST |
+
+---
+
+## Support
+- Discord: https://discord.gg/cryos
+- Email: support@cryos.io
+
+---
+
+*Version: 0.1.0-alpha | Updated: May 2026*
 
 ### Deployment
 

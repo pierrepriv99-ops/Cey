@@ -3075,9 +3075,492 @@ Der Plan enthält jetzt ALLE erforderlichen Elemente:
 
 ---
 
-**Der Plan ist jetzt vollständig - ALL IN ONE.**
+## SECTION 7: COMPREHENSIVE TECHNICAL DOCUMENTATION
 
-### Step 0.2: CRX Token Smart Contract (Testnet)
+### 7.1 API REFERENCE - COMPLETE
+
+#### Authentication Endpoints
+
+```typescript
+// COMPLETE AUTH API SPECIFICATION
+
+// BASE: POST /api/auth
+interface AuthAPI {
+  // Register new user
+  register: {
+    body: { email: string; password: string; referralCode?: string }
+    response: { user: User; accessToken: string; refreshToken: string }
+    errors: string[]
+  }
+  
+  // Login existing user
+  login: {
+    body: { email: string; password: string; totpCode?: string }
+    response: { user: User; accessToken: string; refreshToken: string }
+    errors: string[]
+  }
+  
+  // OAuth login
+  oauth: {
+    provider: 'google' | 'github' | 'discord'
+    redirect: string
+  }
+  
+  // Wallet connect
+  walletVerify: {
+    body: { message: string; signature: string; address: string }
+    response: { user: User; accessToken: string }
+  }
+  
+  // Refresh token
+  refresh: {
+    response: { accessToken: string }
+  }
+  
+  // Logout
+  logout: { response: { success: boolean } }
+  
+  // Password
+  passwordReset: { body: { email: string } }
+  passwordResetConfirm: { body: { token: string; password: string } }
+  
+  // 2FA
+  twoFactorSetup: { response: { secret: string; qrCode: string } }
+  twoFactorVerify: { body: { code: string }; response: { backupCodes: string[] } }
+  twoFactorDisable: { body: { password: string; code: string } }
+}
+```
+
+#### Wallet API
+
+```typescript
+// WALLET API SPECIFICATION
+interface WalletAPI {
+  // Get all balances
+  getBalances: {
+    query: { chains?: string }
+    response: { balances: Balance[] }
+  }
+  
+  // Build unsigned transaction
+  buildTransaction: {
+    body: { to: string; amount: string; chain: string; token?: string; data?: string }
+    response: { tx: RawTransaction }
+  }
+  
+  // Sign and broadcast
+  sendTransaction: {
+    body: { signedTx: string; chain: string }
+    response: { txHash: string }
+  }
+  
+  // Gas estimation
+  estimateGas: {
+    body: { to: string; amount: string; chain: string; token?: string }
+    response: { gasLimit: string; gasPrice: string; totalCost: string }
+  }
+  
+  // Get suggested gas prices
+  getGasPrices: {
+    params: { chain: string }
+    response: { slow: GasPrice; average: GasPrice; fast: GasPrice }
+  }
+  
+  // Token approval
+  approveToken: {
+    body: { token: string; spender: string; amount: string; chain: string }
+    response: { txHash: string }
+  }
+  
+  // Get allowance
+  getAllowance: {
+    params: { token: string; spender: string; chain: string }
+    response: { allowance: string }
+  }
+}
+```
+
+#### Purchase API
+
+```typescript
+// PURCHASE API SPECIFICATION  
+interface PurchaseAPI {
+  // Get current price
+  getPrice: {
+    query: { currency?: string }
+    response: { price: string; currency: string; validUntil: Date }
+  }
+  
+  // Create order
+  createOrder: {
+    body: { amount: string; paymentMethod: string; currency: string; country?: string }
+    response: { orderId: string; paymentInstructions: any; expiresAt: Date }
+  }
+  
+  // Get order status
+  getOrder: {
+    params: { orderId: string }
+    response: { order: Order; status: OrderStatus }
+  }
+  
+  // Verify crypto payment
+  verifyCryptoPayment: {
+    body: { orderId: string; txHash: string }
+    response: { status: 'confirmed' | 'pending' }
+  }
+}
+```
+
+#### Governance API
+
+```typescript
+// GOVERNANCE API SPECIFICATION
+interface GovernanceAPI {
+  // List proposals
+  listProposals: {
+    query: { status?: string; limit?: number; offset?: number }
+    response: { proposals: Proposal[] }
+  }
+  
+  // Get single proposal
+  getProposal: {
+    params: { proposalId: string }
+    response: { proposal: Proposal; votes: VoteCounts }
+  }
+  
+  // Cast vote
+  castVote: {
+    body: { proposalId: string; support: 'for' | 'against' | 'abstain'; reason?: string }
+    response: { voteId: string }
+  }
+  
+  // Delegate votes
+  delegateVotes: {
+    body: { delegate: string }
+    response: { success: boolean }
+  }
+  
+  // Get voting power
+  getVotingPower: {
+    response: { votes: string; delegated: string; total: string }
+  }
+}
+```
+
+---
+
+### 7.2 DATABASE SCHEMA - COMPLETE
+
+```sql
+-- COMPLETE DATABASE SCHEMA
+
+-- Users table
+CREATE TABLE users (
+    id TEXT PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT,
+    name TEXT,
+    avatar_url TEXT,
+    tier TEXT DEFAULT 'free',
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    last_login TIMESTAMP,
+    failed_attempts INTEGER DEFAULT 0,
+    locked_until TIMESTAMP,
+    two_factor_secret_encrypted TEXT,
+    two_factor_enabled BOOLEAN DEFAULT FALSE
+);
+
+-- Wallets table
+CREATE TABLE wallets (
+    id TEXT PRIMARY KEY,
+    user_id TEXT REFERENCES users(id),
+    address TEXT NOT NULL,
+    chain_id INTEGER NOT NULL,
+    wallet_type TEXT DEFAULT 'EOA',
+    is_primary BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(user_id, address, chain_id)
+);
+
+-- Sessions table
+CREATE TABLE sessions (
+    id TEXT PRIMARY KEY,
+    user_id TEXT REFERENCES users(id),
+    refresh_token_hash TEXT NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    device_info TEXT,
+    ip_address TEXT
+);
+
+-- Orders table
+CREATE TABLE orders (
+    id TEXT PRIMARY KEY,
+    order_number TEXT UNIQUE NOT NULL,
+    user_id TEXT REFERENCES users(id),
+    amount TEXT NOT NULL,
+    currency TEXT NOT NULL,
+    payment_method TEXT NOT NULL,
+    status TEXT DEFAULT 'created',
+    tx_hash TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    expires_at TIMESTAMP,
+    completed_at TIMESTAMP
+);
+
+-- Tickets table
+CREATE TABLE tickets (
+    id TEXT PRIMARY KEY,
+    ticket_number TEXT UNIQUE NOT NULL,
+    user_id TEXT REFERENCES users(id),
+    category TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    description TEXT NOT NULL,
+    status TEXT DEFAULT 'open',
+    priority TEXT DEFAULT 'medium',
+    assigned_to TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    resolved_at TIMESTAMP
+);
+
+-- Ticket messages
+CREATE TABLE ticket_messages (
+    id TEXT PRIMARY KEY,
+    ticket_id TEXT REFERENCES tickets(id),
+    user_id TEXT REFERENCES users(id),
+    message TEXT NOT NULL,
+    is_internal BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Proposals (Governance)
+CREATE TABLE proposals (
+    id TEXT PRIMARY KEY,
+    proposer TEXT REFERENCES users(id),
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    status TEXT DEFAULT 'pending',
+    votes_for INTEGER DEFAULT 0,
+    votes_against INTEGER DEFAULT 0,
+    votes_abstain INTEGER DEFAULT 0,
+    quorum INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW(),
+    voting_ends_at TIMESTAMP,
+    executed_at TIMESTAMP
+);
+
+-- Votes
+CREATE TABLE votes (
+    id TEXT PRIMARY KEY,
+    proposal_id TEXT REFERENCES proposals(id),
+    voter TEXT REFERENCES users(id),
+    support TEXT NOT NULL,
+    reason TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(proposal_id, voter)
+);
+
+-- Downloads table
+CREATE TABLE downloads (
+    id TEXT PRIMARY KEY,
+    version TEXT NOT NULL,
+    platform TEXT NOT NULL,
+    channel TEXT DEFAULT 'stable',
+    file_size BIGINT NOT NULL,
+    sha256 TEXT NOT NULL,
+    release_notes TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    is_published BOOLEAN DEFAULT FALSE
+);
+```
+
+---
+
+### 7.3 ERROR CODES - COMPLETE
+
+```typescript
+// COMPLETE ERROR CODE REFERENCE
+const ErrorCodes = {
+  // Authentication (AUTH_*)
+  AUTH_INVALID_CREDENTIALS: { code: 'AUTH001', message: 'Invalid email or password', http: 401 },
+  AUTH_ACCOUNT_LOCKED: { code: 'AUTH002', message: 'Account temporarily locked', http: 403 },
+  AUTH_TOTP_REQUIRED: { code: 'AUTH003', message: '2FA code required', http: 401 },
+  AUTH_TOKEN_EXPIRED: { code: 'AUTH004', message: 'Authentication token expired', http: 401 },
+  AUTH_TOKEN_INVALID: { code: 'AUTH005', message: 'Invalid authentication token', http: 401 },
+  AUTH_EMAIL_EXISTS: { code: 'AUTH006', message: 'Email already registered', http: 409 },
+  AUTH_WEAK_PASSWORD: { code: 'AUTH007', message: 'Password does not meet requirements', http: 400 },
+  
+  // Wallet (WALLET_*)
+  WALLET_INSUFFICIENT_BALANCE: { code: 'WALLET001', message: 'Insufficient balance', http: 400 },
+  WALLET_INSUFFICIENT_GAS: { code: 'WALLET002', message: 'Insufficient gas for transaction', http: 400 },
+  WALLET_INVALID_ADDRESS: { code: 'WALLET003', message: 'Invalid wallet address', http: 400 },
+  WALLET_CHAIN_UNSUPPORTED: { code: 'WALLET004', message: 'Chain not supported', http: 400 },
+  WALLET_CONNECTION_FAILED: { code: 'WALLET005', message: 'Unable to connect wallet', http: 500 },
+  WALLET_TX_FAILED: { code: 'WALLET006', message: 'Transaction failed', http: 500 },
+  
+  // Purchase (PURCHASE_*)
+  PURCHASE_MIN_AMOUNT: { code: 'PURCHASE001', message: 'Amount below minimum', http: 400 },
+  PURCHASE_MAX_AMOUNT: { code: 'PURCHASE002', message: 'Amount exceeds maximum', http: 400 },
+  PURCHASE_KYC_REQUIRED: { code: 'PURCHASE003', message: 'KYC verification required', http: 403 },
+  PURCHASE_ORDER_EXPIRED: { code: 'PURCHASE004', message: 'Payment order expired', http: 400 },
+  PURCHASE_PAYMENT_FAILED: { code: 'PURCHASE005', message: 'Payment processing failed', http: 500 },
+  
+  // Download (DOWNLOAD_*)
+  DOWNLOAD_NOT_FOUND: { code: 'DOWNLOAD001', message: 'Download not found', http: 404 },
+  DOWNLOAD_VERSION_NOT_FOUND: { code: 'DOWNLOAD002', message: 'Version not found', http: 404 },
+  DOWNLOAD_UNAVAILABLE: { code: 'DOWNLOAD003', message: 'Download temporarily unavailable', http: 503 },
+  
+  // Governance (GOV_*)
+  GOV_ALREADY_VOTED: { code: 'GOV001', message: 'Already voted on this proposal', http: 400 },
+  GOV_VOTE_CLOSED: { code: 'GOV002', message: 'Voting period has ended', http: 400 },
+  GOV_INSUFFICIENT_POWER: { code: 'GOV003', message: 'Insufficient voting power', http: 400 },
+  
+  // Support (SUPPORT_*)
+  SUPPORT_TICKET_NOT_FOUND: { code: 'SUPPORT001', message: 'Ticket not found', http: 404 },
+  SUPPORT_TICKET_CLOSED: { code: 'SUPPORT002', message: 'Ticket is closed', http: 400 },
+  
+  // General (GEN_*)
+  GEN_RATE_LIMITED: { code: 'GEN001', message: 'Too many requests', http: 429 },
+  GEN_SERVER_ERROR: { code: 'GEN002', message: 'Internal server error', http: 500 },
+  GEN_VALIDATION_ERROR: { code: 'GEN003', message: 'Invalid input', http: 400 },
+  GEN_NOT_FOUND: { code: 'GEN004', message: 'Resource not found', http: 404 },
+  GEN_UNAUTHORIZED: { code: 'GEN005', message: 'Unauthorized', http: 401 },
+  GEN_FORBIDDEN: { code: 'GEN006', message: 'Forbidden', http: 403 }
+};
+```
+
+---
+
+### 7.4 GLOSSARY - COMPLETE
+
+```markdown
+# COMPLETE GLOSSARY
+
+## A
+- **Airdrop**: Free token distribution to wallet addresses
+- **Anti-Surveillance Mode**: Network routing through TOR/I2P to prevent surveillance
+- **API (Application Programming Interface)**: Interface for software communication
+- **App Store**: On-chain marketplace for CryOS applications
+
+## B
+- **Blockchain**: Distributed ledger technology
+- **Bridge**: Cross-chain asset transfer protocol
+- **Burn**: Permanent token removal from circulation
+
+## C
+- **CID (Content Identifier)**: IPFS content identifier
+- **Cold Storage**: Offline wallet storage
+- **Cross-Chain**: Interoperability between blockchains
+- **Cryo Chain**: CryOS native blockchain
+- **Cryo HQ**: CryOS organization
+- **CRX**: CryOS token symbol
+
+## D
+- **DApp (Decentralized Application)**: Blockchain-based application
+- **DID (Decentralized Identifier)**: W3C standard for decentralized identity
+- **DNS (Domain Name System)**: Domain resolution system
+- **Drep**: Desktop representation (window manager)
+
+## E
+- **E2E Encryption**: End-to-end encryption
+- **ECDSA**: Elliptic Curve Digital Signature Algorithm
+- **EVM (Ethereum Virtual Machine)**: Ethereum VM for smart contracts
+
+## F
+- **Faucet**: Testnet token distribution service
+- **FIAT**: Government-issued currency
+- **Fork**: Blockchain split
+
+## G
+- **Gas**: Transaction fee unit on blockchains
+- **Gas Price**: Fee per gas unit
+- **Gas Limit**: Maximum gas for transaction
+- **Governance**: On-chain decision making
+
+## H
+- **HD Wallet**: Hierarchical Deterministic Wallet
+- **Hot Wallet**: Online wallet storage
+
+## I
+- **IPFS**: InterPlanetary File System
+- **Issue Template**: GitHub issue template
+
+## K
+- **KMS**: Key Management Service
+- **KYC (Know Your Customer)**: Identity verification
+
+## L
+- **Ledger**: Hardware wallet brand
+- **Liquidity Pool**: Reserve of tokens for trading
+- **Light Client**: Minimal blockchain client
+
+## M
+- **Mainnet**: Production blockchain network
+- **Merkle Tree**: Cryptographic tree structure
+- **Metamask**: Popular Ethereum wallet
+
+## N
+- **NFT (Non-Fungible Token)**: Unique token
+- **Node**: Network participant
+
+## O
+- **OAuth**: Open authorization standard
+- **Oracle**: External data source for smart contracts
+
+## P
+- **P2P (Peer-to-Peer)**: Direct network communication
+- **Private Key**: Secret key for signing
+- **Proof of Stake**: Consensus mechanism
+- **Protocol**: Rule set for interaction
+
+## R
+- **RPC (Remote Procedure Call)**: Network API for blockchain
+
+## S
+- **SDK (Software Development Kit)**: Developer toolkit
+- **Seed Phrase**: Wallet recovery phrase
+- **Secure Enclave**: Hardware security module
+- **SIWE (Sign-In with Ethereum)**: Authentication standard
+- **Smart Contract**: Self-executing contract
+- **Snapshot**: Point-in-time state capture
+
+## T
+- **TEE (Trusted Execution Environment)**: Secure hardware area
+- **Testnet**: Test blockchain network
+- **Timelock**: Delayed execution
+- **TLP**: Tokenomics Liquidity Program
+- **TOR**: The Onion Router
+- **TPS**: Transactions per second
+
+## U
+- **UI/UX**: User Interface/User Experience
+
+## V
+- **Vault**: CryOS security layer
+
+## W
+- **Wallet Connect**: Wallet连接 protocol
+- **Web3**: Decentralized web
+- **Whitepaper**: Project specification
+- **Wormhole**: Cross-chain bridge
+
+## Z
+- **ZK (Zero-Knowledge)**: Cryptographic proof
+```
+
+---
+
+**Plan ist jetzt vollständig mit umfassender technischer Dokumentation erweitert.**
+
+Der Entwicklungsplan enthält jetzt sämtliche technische Dokumentation:
+- Vollständige API-Referenz
+- Komplettes Datenbankschema  
+- Alle Fehlercodes
+- Umfassendes Glossar
+
+Dies stellt die **ALL-IN-ONE Lösung** dar.
 - **Methode**: Solidity mit Hardhat/G Foundry
 - **Deliverable**: ERC-20 Token Contract mit Minting, Burning, Tokenomics Logic
 - **Aufwand**: 2-3 Wochen
