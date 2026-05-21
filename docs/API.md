@@ -135,4 +135,196 @@ ws.onmessage = (e) => {
 
 ---
 
+## Pagination
+
+List endpoints support pagination:
+
+```
+GET /api/v1/apps?page=1&limit=20
+```
+
+Response:
+```json
+{
+  "data": [...],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 150,
+    "pages": 8
+  }
+}
+```
+
+---
+
+## Rate Limiting
+
+| Tier | Requests/minute |
+|------|----------------|
+| Free | 60 |
+| Premium | 300 |
+| Enterprise | Unlimited |
+
+Rate limit headers:
+```
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1716331200
+```
+
+---
+
+## SDK Examples
+
+### JavaScript SDK
+
+```javascript
+import { CryOS } from '@cryos/sdk';
+
+// Initialize
+const cryos = new CryOS({
+  apiKey: 'your-api-key'
+});
+
+// Wallet
+const wallet = await cryos.wallet.connect();
+const balance = await wallet.getBalance();
+
+// Transfer
+const tx = await wallet.send({
+  to: '0x...',
+  amount: '1.0',
+  token: 'CRX'
+});
+
+// Apps
+const apps = await cryos.apps.list({ category: 'finance' });
+const app = await cryos.apps.get('app-id');
+```
+
+### React Hook
+
+```jsx
+import { useCryOS, useWallet } from '@cryos/sdk/react';
+
+function WalletBalance() {
+  const { connect, disconnect } = useCryOS();
+  const { balance, loading } = useWallet();
+  
+  if (loading) return <Spinner />;
+  
+  return (
+    <div>
+      <h1>{balance.CRX} CRX</h1>
+      <button onClick={disconnect}>Disconnect</button>
+    </div>
+  );
+}
+```
+
+### cURL Examples
+
+```bash
+# Login
+curl -X POST https://api.cryos.io/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"****"}'
+
+# Get balance
+curl https://api.cryos.io/api/v1/wallet/balance?chain=eth \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# List apps
+curl "https://api.cryos.io/api/v1/apps?category=finance&page=1" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+---
+
+## Webhook Events
+
+Configure webhooks at `https://dashboard.cryos.io/webhooks`
+
+| Event | Payload |
+|-------|---------|
+| `app.installed` | `{ "user_id": "...", "app_id": "...", "timestamp": "..." }` |
+| `transaction.pending` | `{ "tx_hash": "...", "from": "...", "to": "...", "value": "..." }` |
+| `transaction.confirmed` | `{ "tx_hash": "...", "block_number": 12345, "status": "confirmed" }` |
+| `price.alert` | `{ "token": "CRX", "condition": "above", "price": "2.50" }` |
+| `subscription.renewed` | `{ "user_id": "...", "plan": "premium", "expires": "..." }` |
+
+---
+
+## SDK Types
+
+```typescript
+// Wallet types
+interface Wallet {
+  address: string;
+  chain: 'eth' | 'polygon' | 'bsc' | 'avalanche' | 'arbitrum' | 'optimism';
+  balances: Record<string, string>;
+  connected: boolean;
+}
+
+// Transaction types  
+interface TransactionRequest {
+  to: string;
+  value: string;
+  token: string;
+  chain: string;
+  data?: string;
+  gasLimit?: string;
+  gasPrice?: string;
+}
+
+interface TransactionReceipt {
+  txHash: string;
+  blockNumber: number;
+  status: 'pending' | 'confirmed' | 'failed';
+  gasUsed: string;
+}
+
+// App types
+interface App {
+  id: string;
+  name: string;
+  developer: string;
+  description: string;
+  category: string;
+  price: number;
+  ratings: number;
+  installs: number;
+  icon: string;
+}
+```
+
+---
+
+## Sandbox Environment
+
+For testing, use the sandbox:
+```
+Base URL: https://sandbox.api.cryos.io
+
+Endpoints are identical to production.
+Testnet transactions only - no real funds.
+```
+
+---
+
+## Changelog
+
+### v0.1.0 (May 2026)
+- Initial release
+- Authentication endpoints
+- Wallet operations
+- Apps listing
+
+### v0.0.x (Beta)
+- Alpha testing
+- Limited endpoints
+
+---
+
 *Version: 0.1.0*
