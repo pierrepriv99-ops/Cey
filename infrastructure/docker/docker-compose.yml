@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # Frontend Web Application
+  web:
+    build:
+      context: ./website
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_APP_URL=${APP_URL}
+    restart: unless-stopped
+    networks:
+      - cryos-network
+
+  # API Server
+  api:
+    build:
+      context: ./store
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - CRX_TOKEN_ADDRESS=${CRX_TOKEN_ADDRESS}
+    depends_on:
+      - database
+      - redis
+    restart: unless-stopped
+    networks:
+      - cryos-network
+
+  # Database
+  database:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=cryos
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - cryos-network
+
+  # Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - cryos-network
+
+  # Ethereum Node (Lite)
+  ethereum:
+    image: ghcr.io/foundry-rs/foundry:latest
+    command: anvil --host 0.0.0.0 --chain-id 11155111
+    ports:
+      - "8545:8545"
+    restart: unless-stopped
+    networks:
+      - cryos-network
+
+networks:
+  cryos-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
