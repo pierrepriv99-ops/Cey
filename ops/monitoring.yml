@@ -1,0 +1,136 @@
+# CryOS Post-Release Operations
+
+## Monitoring Configuration
+
+### Health Checks
+
+| Check | Threshold | Alert |
+|-------|----------|-------|
+| API Response | >500ms | Warning |
+| Contract Calls | >2s | Warning |
+| Block Time | >30s | Critical |
+| Gas Price | >500 gwei | Alert |
+
+### Prometheus Metrics
+
+```yaml
+# metrics.yml
+metrics:
+  - name: cryos_transactions_total
+    type: counter
+    help: Total transactions processed
+  
+  - name: cryos_gas_used
+    type: gauge
+    help: Gas Used
+    
+  - name: cryos_active_users
+    type: gauge
+    help: Active users
+    
+  - name: cryos_tvl
+    type: gauge
+    help: Total Value Locked
+```
+
+### Grafana Dashboards
+
+- **API Dashboard**: Request rate, latency, errors
+- **Chain Dashboard**: Block production, gas prices
+- **Wallet Dashboard**: Balances, transaction volume
+
+## Alert Rules
+
+```yaml
+groups:
+  - name: cryos
+    rules:
+      - alert: HighGasPrice
+        expr: gas_price > 500
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High gas price detected
+      
+      - alert: APIDown
+        expr: up{job="api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        
+      - alert: FailedTransactions
+        expr: rate(cryos_failed_tx[5m]) > 0.1
+        labels:
+          severity: warning
+```
+
+## Rollback Procedures
+
+### Contract Rollback
+
+1. **Identify Issue**
+   ```bash
+   # Check for failed transactions
+   npx hardhat test --grep "Revert"
+   ```
+
+2. **Pause Contract**
+   ```solidity
+   function pause() external onlyOwner {
+       _pause();
+   }
+   ```
+
+3. **Deploy Fix**
+   ```bash
+   npx hardhat run scripts/deploy.js --network mainnet
+   ```
+
+4. **Verify**
+   ```bash
+   npx hardhat verify --network mainnet <address>
+   ```
+
+### Database Rollback
+
+```bash
+# Point to previous version
+kubectl rollout undo deployment/cryos-api
+```
+
+---
+
+## Changelog Template
+
+```markdown
+# Changelog - v0.x.x
+
+## What's Changed
+- [Feature] Description (#PR)
+- [Fix] Description (#PR)
+
+## New Contributors
+- @contributor
+
+**Full Changelog**: https://github.com/.../compare/v0.x.x...v0.x.y
+```
+
+---
+
+## Release Checklist
+
+- [ ] All tests passing
+- [ ] Changelog updated
+- [ ] Version bumped
+- [ ] Tag created
+- [ ] GitHub Release published
+- [ ] Discord announcement
+- [ ] Twitter announcement (optional)
+
+---
+
+## Contact
+
+- **On-Call**: rotation in #ops channel
+- **Emergency**: email: ops@cryos.io
