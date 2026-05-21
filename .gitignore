@@ -18,7 +18,7 @@ typechain-types/
 .env
 .env.local
 .env.production
-.secrets
+/secrets
 
 # IDE
 .vscode/

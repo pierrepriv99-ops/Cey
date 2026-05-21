@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CryOS - Financial Sovereignty Embedded in the Kernel</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --ice-blue: #00d4ff;
+      --deep-frost: #0a1628;
+      --glacial: #e8f4fc;
+      --cryo-glow: #00ffcc;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--deep-frost);
+      color: var(--glacial);
+      line-height: 1.6;
+    }
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 22, 40, 0.8);
+      z-index: 100;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--ice-blue);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .logo span { color: var(--cryo-glow); }
+    nav a {
+      color: var(--glacial);
+      text-decoration: none;
+      margin-left: 2rem;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--ice-blue); }
+    
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+      background: 
+        radial-gradient(ellipse at 20% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(0, 255, 204, 0.08) 0%, transparent 50%),
+        var(--deep-frost);
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.03em;
+    }
+    .hero h1 .accent {
+      background: linear-gradient(135deg, var(--ice-blue), var(--cryo-glow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.25rem;
+      max-width: 600px;
+      margin-bottom: 2rem;
+      opacity: 0.8;
+    }
+    .btn {
+      display: inline-block;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, var(--ice-blue), var(--cryo-glow));
+      color: var(--deep-frost);
+      text-decoration: none;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 40px rgba(0, 212, 255, 0.3);
+    }
+    
+    .features {
+      padding: 6rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .section-title {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 4rem;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+    .feature-card {
+      padding: 2rem;
+      border: 1px solid rgba(0, 212, 255, 0.1);
+      border-radius: 12px;
+      background: rgba(0, 212, 255, 0.02);
+    }
+    .feature-card h3 {
+      color: var(--ice-blue);
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+    }
+    .feature-card p { opacity: 0.8; }
+    
+    footer {
+      padding: 3rem 2rem;
+      text-align: center;
+      border-top: 1px solid rgba(0, 212, 255, 0.1);
+    }
+    footer p { opacity: 0.5; font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/" class="logo">Cry<span>OS</span></a>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="/docs">Docs</a>
+      <a href="https://github.com/pierrepriv99-ops/Cey">GitHub</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Financial Sovereignty<br><span class="accent">Embedded in the Kernel</span></h1>
+    <p>The first Web3-native operating system. Decentralized identity, native blockchain integration, and zero-knowledge security — built directly into your device.</p>
+    <a href="#features" class="btn">Explore the Future</a>
+  </section>
+
+  <section class="features" id="features">
+    <h2 class="section-title">Built Different</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h3>🛡️ Self-Sovereign Identity</h3>
+        <p>DID-based authentication that puts you in control. No corporate databases, no compromises.</p>
+      </div>
+      <div class="feature-card">
+        <h3>⛓️ Native Blockchain</h3>
+        <p>Transaction signing happens at the OS level. Hardware-secured, chain-native wallet integration.</p>
+      </div>
+      <div class="feature-card">
+        <h3>🔐 Zero-Knowledge Security</h3>
+        <p>Proof-of-identity without revelation. Your data stays yours, forever.</p>
+      </div>
+      <div class="feature-card">
+        <h3>🤖 Adaptive Intelligence</h3>
+        <p>On-device AI that learns your patterns while keeping everything local. Never your data leaves your device.</p>
+      </div>
+      <div class="feature-card">
+        <h3>🌐 P2P Mesh Network</h3>
+        <p>Communication without central servers. True decentralization, end-to-end encrypted.</p>
+      </div>
+      <div class="feature-card">
+        <h3>📱 Mobile-First</h3>
+        <p>Starting with Android, built for all devices. Your OS, everywhere.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 CryOS Foundation. All rights reserved.</p>
+    <p>CryOS: Financial Sovereignty in Your Hands 🧊</p>
+  </footer>
+</body>
+</html>
