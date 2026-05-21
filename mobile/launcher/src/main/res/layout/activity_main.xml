@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0A1628">
+
+    <!-- Status Bar Spacer -->
+    <Space
+        android:id="@+id/status_bar"
+        android:layout_width="match_parent"
+        android:layout_height="24dp" />
+
+    <!-- Date/Time Widget -->
+    <TextView
+        android:id="@+id/date_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="32dp"
+        android:text="Tue, May 21\n10:00 AM"
+        android:textColor="#E8F4FC"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif-medium" />
+
+    <!-- Home Screen Icons -->
+    <GridLayout
+        android:id="@+id/home_grid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="80dp"
+        android:paddingBottom="200dp" />
+
+    <!-- Search Bar -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/search_bar"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="140dp"
+        app:cardBackgroundColor="#1A2942"
+        app:cardCornerRadius="24dp"
+        app:strokeWidth="0dp"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp">
+            
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/ic_menu_search"
+                android:tint="#6B7A8C" />
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="Search apps..."
+                android:textColor="#6B7A8C"
+                android:textSize="14sp" />
+                
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Dock / Quick Access Bar -->
+    <LinearLayout
+        android:id="@+id/dock_container"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/dock_background"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="8dp" />
+
+    <!-- Navigation Bar Spacer -->
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        android:layout_gravity="bottom" />
+
+</FrameLayout>

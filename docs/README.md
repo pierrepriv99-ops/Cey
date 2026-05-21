@@ -1,6 +1,8 @@
 # CryOS Developer Documentation
 
-Welcome to the CryOS developer docs. This is Phase 0 (Foundation) documentation.
+## Current Status: Phase 1 - Mobile Alpha
+
+Welcome to the CryOS developer docs.
 
 ## Project Structure
 

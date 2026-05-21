@@ -1,0 +1,21 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode = DependencyResolutionModes.PREFER_SETTINGS
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "CryOS"
+include ':mobile:launcher'
+include ':mobile:vault'
+include ':mobile:wallet'
+include ':mobile:sdk'
