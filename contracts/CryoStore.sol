@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 /// @title CryoStore - Decentralized App Store Contract
 /// @notice App distribution with paid/free/freemium models
 /// @dev Supports app registration, versioning, and revenue distribution
-contract CryoStore is Ownable, ReentrancyGuard {
+contract CryoStore is ReentrancyGuard {
 
     struct App {
         string name;
