@@ -1,0 +1,13 @@
+{
+  "name": "@cryos/enterprise",
+  "version": "0.1.0",
+  "description": "CryOS Enterprise - B2B Solutions",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "ethers": "^6.10.0"
+  }
+}

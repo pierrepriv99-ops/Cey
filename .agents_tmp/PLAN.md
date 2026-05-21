@@ -156,9 +156,227 @@ Jede Phase enthält mehrere Deliverables mit geschätzten Aufwänden.
 
 ### Step 0.1: CryoHQ Website erstellen
 - **Methode**: Next.js/React mit Frost UI Design Language
-- **Deliverable**: Responsive Landing page mit Whitepaper-Section, Blog, Newsletter
+- **Deliverable**: Vollständige CryoHQ Website mit allen Assets und professionellen Funktionen
 - **Aufwand**: 4-6 Wochen
 - **Referenz**: /website, /public
+
+**Website Struktur & Features:**
+
+| Sektion | Features | Priority |
+|--------|----------|----------|
+| **Downloads** | APK Downloads, ISO Images, SDK Packages, Version History, Update Notifications | HIGH |
+| **Info / About** | Team Page, Company Info, Mission Statement, Press Kit, Media Assets | HIGH |
+| **Contact** | Contact Form, Support Ticket System, Email Integration, Social Links | HIGH |
+| **Login / Auth** | User Authentication, OAuth (Google, GitHub, Wallet Connect), Session Management | HIGH |
+| **Engine / Dashboard** | User Dashboard, Wallet Connection, Token Balance, Transaction History | HIGH |
+| **Purchases** | Token Purchase (ICO/IDO), Merchandise Shop, Premium Features, Payment Gateway Integration | MEDIUM |
+| **Blog / News** | Blog Posts, Announcements, Changelog, Newsletter Subscription | MEDIUM |
+| **Documentation** | API Docs, Quick Start Guide, FAQ, Community Forum Link | MEDIUM |
+
+**Technische Features:**
+
+- **Asset Management:**
+  - CDN für Downloads (APK, ISO, SDK)
+  - Versionierung und Hash-Verifikation
+  - automatische Update-Checks
+  - Download-Analytics
+
+- **Authentication System:**
+  - Wallet Connect Integration (ETH, SOL, WalletConnect v2)
+  - OAuth (Google, GitHub, Discord)
+  - JWT Session Management
+  - 2FA Support (TOTP)
+  - Password Reset Flow
+
+- **Purchase Engine:**
+  - Token Sale Smart Contract (ICO/IDO/Public Sale)
+  - Fiat Payment Gateway (Stripe, MoonPay)
+  - Order Management System
+  - Invoice Generation
+  - KYC/AML Integration Ready
+
+- **User Dashboard:**
+  - Wallet Portfolio View
+  - Token Balance Display (CRX, ETH, BTC, etc.)
+  - Transaction History
+  - NFT Gallery
+  - Governance Voting Interface
+  - Notification Preferences
+
+- **Contact & Support:**
+  - Ticketing System (Frontmatter)
+  - Knowledge Base
+  - AI Chatbot (Cryo Mind Integration)
+  - Community Discord Link
+
+### Step 0.1.1: Website Frontend (Next.js)
+- **Methode**: Next.js 14 mit TypeScript, Tailwind CSS
+- **Deliverable**: Responsive Pages, Components, Animations
+- **Aufwand**: 2-3 Wochen
+- **Referenz**: /website/src/app
+
+```
+/website
+├── src/
+│   ├── app/
+│   │   ├── page.tsx                 # Landing Page
+│   │   ├── downloads/page.tsx       # Downloads Page
+│   │   ├── info/page.tsx           # About/Info Page
+│   │   ├── contact/page.tsx         # Contact Page
+│   │   ├── login/page.tsx           # Login Page
+│   │   ├── dashboard/page.tsx       # User Dashboard
+│   │   ├── purchase/page.tsx         # Token Purchase
+│   │   ├── blog/page.tsx            # Blog Section
+│   │   └── docs/page.tsx            # Documentation Link
+│   ├── components/
+│   │   ├── ui/                     # Reusable UI Components
+│   │   ├── layout/                 # Header, Footer, Sidebar
+│   │   ├── auth/                   # Auth Components
+│   │   ├── wallet/                  # Wallet Connection
+│   │   └── download/               # Download Manager
+│   ├── lib/
+│   │   ├── utils.ts                # Utilities
+│   │   ├── api.ts                  # API Client
+│   │   └── constants.ts            # Constants
+│   └── styles/
+│       └── globals.css             # Global Styles + Frost UI
+```
+
+### Step 0.1.2: Backend API (Node.js)
+- **Methode**: Next.js API Routes + PostgreSQL + Redis
+- **Deliverable**: RESTful API für alle Features
+- **Aufwand**: 2-3 Wochen
+- **Referenz**: /website/src/app/api
+
+**API Endpoints:**
+
+| Endpoint | Method | Beschreibung |
+|----------|--------|--------------|
+| `/api/auth/login` | POST | User Login |
+| `/api/auth/register` | POST | User Registration |
+| `/api/auth/oauth` | GET | OAuth Callback |
+| `/api/auth/logout` | POST | User Logout |
+| `/api/auth/refresh` | POST | Token Refresh |
+| `/api/user/profile` | GET/PUT | User Profile |
+| `/api/wallet/connect` | POST | Connect Wallet |
+| `/api/wallet/balance` | GET | Token Balance |
+| `/api/wallet/transactions` | GET | Transaction History |
+| `/api/downloads` | GET | List Downloads |
+| `/api/downloads/[version]` | GET | Download by Version |
+| `/api/purchase/create` | POST | Create Purchase Order |
+| `/api/purchase/[id]` | GET | Get Order Status |
+| `/api/purchase/verify` | POST | Verify Payment |
+| `/api/contact/ticket` | POST | Create Support Ticket |
+| `/api/contact/tickets` | GET | List User Tickets |
+
+### Step 0.1.3: Database Schema (PostgreSQL)
+- **Methode**: Prisma ORM mit PostgreSQL
+- **Deliverable**: Database Schema und Migrations
+- **Aufwand**: 1 Woche
+- **Referenz**: /website/prisma
+
+```prisma
+// Schema Übersicht
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String?
+  name          String?
+  wallets       Wallet[]
+  tickets       Ticket[]
+  orders        Order[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Wallet {
+  id            String    @id @default(cuid())
+  userId        String
+  address       String
+  chain         Chain
+  type          WalletType
+  user          User      @relation(fields: [userId], references: [id])
+}
+
+model Ticket {
+  id            String    @id @default(cuid())
+  userId        String
+  subject       String
+  description  String
+  status       TicketStatus
+  priority     Priority
+  user          User      @relation(fields: [userId], references: [id])
+}
+
+model Order {
+  id            String    @id @default(cuid())
+  userId        String
+  amount        BigInt
+  currency      String
+  status        OrderStatus
+  txHash        String?
+  user          User      @relation(fields: [userId], references: [id])
+}
+```
+
+### Step 0.1.4: Authentication Implementation
+- **Methode**: NextAuth.js v5 mit Custom Providers
+- **Deliverable**: Vollständiges Auth System
+- **Aufwand**: 1-2 Wochen
+- **Referenz**: /website/src/lib/auth
+
+**Login Methoden:**
+1. **Email/Password** - Traditionell mit bcrypt hashing
+2. **Wallet Connect** - Metamask, Rainbow, Coinbase Wallet
+3. **OAuth** - Google, GitHub, Discord
+4. **Social** - Magic Link (optional)
+
+### Step 0.1.5: Download Manager
+- **Methode**: AWS S3/CDN + Serverless Functions
+- **Deliverable**: Download Tracking, Version Control
+- **Aufwand**: 1 Woche
+- **Referenz**: /website/src/components/download
+
+**Features:**
+- Versionierte Downloads (v1.0.0, v1.0.1, etc.)
+- SHA256/PGP Signatur Verifikation
+- Download Counter Analytics
+- Update Notification System
+
+### Step 0.1.6: Purchase Engine
+- **Methode**: Stripe + Custom Smart Contract Listener
+- **Deliverable**: Token Sale Integration
+- **Aufwand**: 1-2 Wochen
+- **Referenz**: /website/src/components/purchase
+
+**Payment Methods:**
+- Credit Card (Stripe)
+- Crypto (ETH, USDC - direkt zum SC)
+- MoonPay (Fiat on-ramp)
+- Bank Transfer (Enterprise)
+
+### Step 0.1.7: UI/UX Frost Design Implementation
+- **Methode**: Custom Tailwind Config + Framer Motion
+- **Deliverable**: Professionelles CryOS Design
+- **Aufwand**: 1-2 Wochen
+- **Referenz**: /website/src/styles
+
+**Design System:**
+- Frost UI Tokens (Farben, Spacing, Typography)
+- Glassmorphism Komponenten
+- Ambient Glow System
+- Animation Library
+- Responsive Breakpoints
+
+**Milestone Checkpoint**: ◉ Website Complete when:
+- [ ] Landing Page mit Frost UI Design
+- [ ] Downloads Section: Alle aktuellen Releases
+- [ ] User Authentication: min. 3 Login-Methoden
+- [ ] Dashboard: Wallet Connection funktioniert
+- [ ] Purchase Engine: Token Sale möglich
+- [ ] Contact Form: Support Tickets
+- [ ] SEO-optimiert für CryoHQ Keywords
+- [ ] Lighthouse Performance Score >90
 
 ### Step 0.2: CRX Token Smart Contract (Testnet)
 - **Methode**: Solidity mit Hardhat/G Foundry
