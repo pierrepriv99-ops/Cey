@@ -1,0 +1,18 @@
+{
+  "name": "@cryos/extensions",
+  "version": "0.1.0",
+  "description": "CryOS Extensions Framework - Plugin architecture for third-party extensions",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [
+    "cryos",
+    "extensions",
+    "plugins",
+    "middleware"
+  ],
+  "author": "CryOS Team",
+  "license": "MIT"
+}

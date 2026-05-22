@@ -1,0 +1,15 @@
+{
+  "name": "@cryos/futures",
+  "version": "0.1.0",
+  "description": "CryOS Futures - Feature discovery and development roadmap",
+  "scripts": {
+    "dev": "node src/server.js"
+  },
+  "keywords": [
+    "cryos",
+    "roadmap",
+    "features"
+  ],
+  "author": "CryOS Team",
+  "license": "MIT"
+}

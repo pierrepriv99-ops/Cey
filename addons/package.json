@@ -1,0 +1,18 @@
+{
+  "name": "@cryos/addons",
+  "version": "0.1.0",
+  "description": "CryOS Design System - Themable UI component library",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [
+    "cryos",
+    "design-system",
+    "ui-components",
+    "theming"
+  ],
+  "author": "CryOS Team",
+  "license": "MIT"
+}
