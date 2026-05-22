@@ -38,6 +38,13 @@
       "static/chunks/807-3e29a7fd60321fb3.js",
       "static/chunks/app/downloads/page-092a26150ea95805.js"
     ],
+    "/info/page": [
+      "static/chunks/webpack-9560ffa763f88399.js",
+      "static/chunks/fd9d1056-0d3e59ecefe83fbe.js",
+      "static/chunks/69-14ee9ecdd7d07f5e.js",
+      "static/chunks/main-app-8e6aac9a55d9e498.js",
+      "static/chunks/app/info/page-878f2321daa654f0.js"
+    ],
     "/page": [
       "static/chunks/webpack-9560ffa763f88399.js",
       "static/chunks/fd9d1056-0d3e59ecefe83fbe.js",

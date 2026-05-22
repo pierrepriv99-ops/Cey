@@ -1,0 +1,31 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[945],{2754:function(e,t,s){Promise.resolve().then(s.bind(s,2788))},7461:function(e,t,s){"use strict";s.d(t,{Z:function(){return a}});var r=s(4090),i={xmlns:"http://www.w3.org/2000/svg",width:24,height:24,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round"};/**
+ * @license lucide-react v0.312.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let n=e=>e.replace(/([a-z0-9])([A-Z])/g,"$1-$2").toLowerCase().trim(),a=(e,t)=>{let s=(0,r.forwardRef)((s,a)=>{let{color:c="currentColor",size:l=24,strokeWidth:o=2,absoluteStrokeWidth:d,className:u="",children:m,...x}=s;return(0,r.createElement)("svg",{ref:a,...i,width:l,height:l,stroke:c,strokeWidth:d?24*Number(o)/Number(l):o,className:["lucide","lucide-".concat(n(e)),u].join(" "),...x},[...t.map(e=>{let[t,s]=e;return(0,r.createElement)(t,s)}),...Array.isArray(m)?m:[m]])});return s.displayName="".concat(e),s}},7451:function(e,t,s){"use strict";s.d(t,{Z:function(){return r}});/**
+ * @license lucide-react v0.312.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let r=(0,s(7461).Z)("Globe",[["circle",{cx:"12",cy:"12",r:"10",key:"1mglay"}],["path",{d:"M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20",key:"13o1zl"}],["path",{d:"M2 12h20",key:"9i4pu4"}]])},7326:function(e,t,s){"use strict";s.d(t,{Z:function(){return r}});/**
+ * @license lucide-react v0.312.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let r=(0,s(7461).Z)("Shield",[["path",{d:"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10",key:"1irkt0"}]])},4059:function(e,t,s){"use strict";s.d(t,{Z:function(){return r}});/**
+ * @license lucide-react v0.312.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let r=(0,s(7461).Z)("Users",[["path",{d:"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2",key:"1yyitq"}],["circle",{cx:"9",cy:"7",r:"4",key:"nufk8"}],["path",{d:"M22 21v-2a4 4 0 0 0-3-3.87",key:"kshegd"}],["path",{d:"M16 3.13a4 4 0 0 1 0 7.75",key:"1da9ce"}]])},7404:function(e,t,s){"use strict";s.d(t,{Z:function(){return r}});/**
+ * @license lucide-react v0.312.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let r=(0,s(7461).Z)("Zap",[["polygon",{points:"13 2 3 14 12 14 11 22 21 10 12 10 13 2",key:"45s27k"}]])},2788:function(e,t,s){"use strict";s.r(t),s.d(t,{default:function(){return u}});var r=s(3827),i=s(7326),n=s(7451),a=s(4059),c=s(7404);/**
+ * @license lucide-react v0.312.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */let l=(0,s(7461).Z)("Award",[["circle",{cx:"12",cy:"8",r:"6",key:"1vp47v"}],["path",{d:"M15.477 12.89 17 22l-5-3-5 3 1.523-9.11",key:"em7aur"}]]),o=[{name:"CryOS Foundation",role:"Core Team",bio:"Building financial sovereignty for everyone."}],d=[{icon:i.Z,title:"Security First",description:"Zero-knowledge architecture keeps your assets yours."},{icon:n.Z,title:" Decentralization",description:"Own your identity, keys, and data."},{icon:a.Z,title:"Community Led",description:"Governance by the people, for the people."},{icon:c.Z,title:"Speed & Privacy",description:"Fast transactions with complete privacy."},{icon:l,title:"Open Source",description:"Transparent, auditable, and free."}];function u(){return(0,r.jsx)("div",{className:"min-h-screen pt-20",children:(0,r.jsxs)("div",{className:"container",children:[(0,r.jsxs)("section",{className:"py-16 text-center",children:[(0,r.jsx)("h1",{className:"text-4xl font-bold mb-4",children:"About CryOS"}),(0,r.jsx)("p",{className:"text-xl text-[--glacial]/60 max-w-2xl mx-auto",children:"Building the future of financial sovereignty"})]}),(0,r.jsxs)("section",{className:"py-12 card max-w-3xl mx-auto mb-12",children:[(0,r.jsx)("h2",{className:"text-2xl font-bold mb-4",children:"Our Mission"}),(0,r.jsx)("p",{className:"text-[--glacial]/80 leading-relaxed",children:"CryOS is a Web3-native operating system that puts financial sovereignty directly in your pocket. We believe your keys, your identity, and your assets should never leave your control. Built on open protocols with zero-knowledge cryptography, CryOS delivers the security of cold storage with the UX of hot wallets."})]}),(0,r.jsxs)("section",{className:"py-12",children:[(0,r.jsx)("h2",{className:"text-2xl font-bold mb-8 text-center",children:"Our Values"}),(0,r.jsx)("div",{className:"grid md:grid-cols-3 gap-6",children:d.map(e=>{let{icon:t,title:s,description:i}=e;return(0,r.jsxs)("div",{className:"card text-center p-6",children:[(0,r.jsx)(t,{size:32,className:"mx-auto mb-4 text-[--ice-blue]"}),(0,r.jsx)("h3",{className:"font-semibold mb-2",children:s}),(0,r.jsx)("p",{className:"text-sm text-[--glacial]/60",children:i})]},s)})})]}),(0,r.jsxs)("section",{className:"py-12",children:[(0,r.jsx)("h2",{className:"text-2xl font-bold mb-8 text-center",children:"Team"}),(0,r.jsx)("div",{className:"grid md:grid-cols-3 gap-6 max-w-2xl mx-auto",children:o.map(e=>{let{name:t,role:s,bio:i}=e;return(0,r.jsxs)("div",{className:"card p-6 text-center",children:[(0,r.jsx)("div",{className:"w-16 h-16 rounded-full bg-[--ice-blue]/20 flex items-center justify-center mx-auto mb-4",children:(0,r.jsx)(a.Z,{size:24,className:"text-[--ice-blue]"})}),(0,r.jsx)("h3",{className:"font-semibold",children:t}),(0,r.jsx)("p",{className:"text-sm text-[--ice-blue] mb-2",children:s}),(0,r.jsx)("p",{className:"text-sm text-[--glacial]/60",children:i})]},t)})})]}),(0,r.jsxs)("section",{className:"py-12 card max-w-3xl mx-auto",children:[(0,r.jsx)("h2",{className:"text-2xl font-bold mb-4",children:"Press & Media"}),(0,r.jsx)("p",{className:"text-[--glacial]/80 mb-4",children:"For press inquiries, please contact us through the contact form."}),(0,r.jsx)("a",{href:"/contact",className:"btn btn-primary",children:"Contact Us"})]})]})})}}},function(e){e.O(0,[971,69,744],function(){return e(e.s=2754)}),_N_E=e.O()}]);

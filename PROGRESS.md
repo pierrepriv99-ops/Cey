@@ -55,7 +55,7 @@ CryOS is a Web3-native operating system project with multi-phase development roa
 | Package | Path | Status | Notes |
 |---------|------|--------|-------|
 | Contracts | `/contracts/` | ✅ Functional | ERC-20, Store |
-| Website | `/website/` | ✅ GitHub Pages Ready | 8 static pages |
+| Website | `/website/` | ✅ GitHub Pages Ready | 9 static pages |
 | Mobile | `/mobile/` | ✅ Android Skeleton | Launcher, Vault, Wallet |
 | Desktop | `/desktop/` | ⚠️ Electron Skeleton | Electron app |
 | Network | `/network/` | ✅ P2P Core | Messaging, NAT |
@@ -88,7 +88,7 @@ cd website && npm run build  # 8 static pages ✅
 | Component | Status | Details |
 |-----------|--------|---------|
 | Contracts | ✅ Pass | 11 files compiled, 5 tests passing |
-| Website | ✅ Pass | 8 static pages generated |
+| Website | ✅ Pass | 9 static pages generated (+Info) |
 | Mobile | ⚠️ Skeleton | Android project ready for IDE |
 | Network | ⚠️ Skeleton | Requires server runtime |
 | Mind | ⚠️ Skeleton | Node.js dependencies installed |

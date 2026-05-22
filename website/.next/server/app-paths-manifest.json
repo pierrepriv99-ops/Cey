@@ -3,6 +3,7 @@
   "/contact/page": "app/contact/page.js",
   "/dashboard/page": "app/dashboard/page.js",
   "/downloads/page": "app/downloads/page.js",
+  "/info/page": "app/info/page.js",
   "/page": "app/page.js",
   "/login/page": "app/login/page.js"
 }
