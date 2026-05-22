@@ -8,6 +8,8 @@ dist/
 build/
 *.apk
 *.aab
+website/.next/
+website/out/
 
 # Smart contract outputs
 artifacts/
