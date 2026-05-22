@@ -1,12 +1,1050 @@
-# 1. OBJECTIVE
----
-title: CryOS Material Design 3 Redesign
----
-# CryOS Website Deployment Fix Plan
+# FEHLENDE FEATURES & OPTIMIERUNGEN DER CRYOS WEBSITE
 
-## FIX OBJECTIVE: Clean up workflow configs and ensure accurate npm build for all website routes
+## 📋 QUICK REFERENCE
 
-Entwicklung eines vollständigen Web3-nativen Betriebssystem-Ökosystems (CryOS) für Desktop und Mobile Umgebungen. Das System soll dezentrale Identität, native Blockchain-Integration, Zero-Knowledge Sicherheitsarchitektur und eine KI-gestützte adaptive Benutzeroberfläche bieten. Das finale Produkt ist ein vollständiges Betriebssystem, das finanzielle Souveränität direkt im Kernel verankert.
+| # | Feature | Status | Aufwand |
+|---|---------|--------|---------|
+| 1 | Design-System (CSS-Variablen) | ✅ Complete | 2h |
+| 2 | Navigation + Mobile Menu | ✅ Complete | 2h |
+| 3 | Hero Badge + Dual CTAs | ✅ Complete | 1.5h |
+| 4 | Feature-Cards (6 statt 4) | ✅ Complete | 2h |
+| 5 | Roadmap-Sektion | ✅ Complete | 2h |
+| 6 | FAQ-Akkordeon | ✅ Complete | 1.5h |
+| 7 | Waitlist-Formular | ✅ Complete | 1h |
+| 8 | Footer Optimierung | ✅ Present | 1h |
+| 9 | Animationen | ✅ Complete | 2h |
+| 10 | Testing | ✅ Done | 2h |
+
+**⬇️ Full Details Below**
+
+---
+
+**Ziel**: Die CryOS-Website (Next.js Version unter `/website/src/app/page.js`) um alle fehlenden Features, Design-Komponenten und Optimierungen erweitern, basierend auf dem bereitgestellten Design-System.
+
+**Operative Aufgabe**: Die aktuelle Website-Implementierung analysieren und systematisch alle fehlenden Sektionen hinzufügen: Navigation mit mobilem Menü, erweiterte Hero-Sektion mit Animationen, Feature-Cards mit Icons und Status-Badges, vollständige Roadmap-Sektion, FAQ-Akkordeon, Waitlist/Newsletter-Formular und optimierter Footer.
+
+---
+
+## 2. CONTEXT SUMMARY
+
+### 2.1 Technologie-Stack
+Das Projekt verwendet:
+- **Framework**: Next.js 14.1.0
+- **Styling**: TailwindCSS 3.4.0 + benutzerdefinierte CSS-Variablen
+- **Animation**: Framer Motion 11.0.0
+- **Icons**: Lucide React 0.312.0
+- **Krypto-Wallet**: RainbowKit 2.0.0 + Wagmi 2.0.0
+- **Blockchain**: Ethers 6.10.0
+
+### 2.2 Bestehende Struktur
+Die Website besteht aus folgenden Dateien:
+- `/website/src/app/page.js` ← Hauptseite (wird erweitert)
+- `/website/src/styles/globals.css` ← Globale Styles + Design-System
+- `/website/src/app/layout.js` ← Root Layout mit SEO-Metadata
+- `/website/package.json` ← Abhängigkeiten
+
+### 2.3 Design-System (bereits teilweise implementiert)
+Das bestehende Design-System nutzt bereits:
+
+```css
+:root {
+  --ice-blue: #00d4ff;      /* Primary Accent */
+  --deep-frost: #0a1628;     /* Background */
+  --glacial: #e8f4fc;       /* Text */
+  --cryo-glow: #00ffcc;      /* Secondary Accent */
+  --surface: #1a2942;        /* Card Background */
+  --surface-light: #243652;
+}
+```
+
+**Ergänzungen gemäß User-Spezifikation:**
+- `--color-bg: #050A14` (tief-dunkelblau)
+- `--color-surface: #0D1B2A`
+- `--color-border: #1A2E44`
+- `--color-secondary: #7C3AED` (Violett)
+- `--color-glow: rgba(0, 212, 255, 0.15)`
+- `--color-muted: #6B7A8D`
+- `--color-success: #10B981`
+- `--color-warning: #F59E0B`
+
+### 2.4 Prioritätsreihenfolge
+Die fehlenden Features werden nach folgender Reihenfolge implementiert:
+
+| Priorität | Feature | Aufwand | Abhängigkeiten |
+|-----------|---------|--------|----------------|
+| 1 | Design-System Upgrade (CSS-Variablen) | 1 Std | globals.css |
+| 2 | Navigation (Sticky + Mobile Menu) | 2 Std | page.js |
+| 3 | Hero-Sektion Erweiterung | 2 Std | page.js |
+| 4 | Feature-Cards (6 statt 4) | 2 Std | page.js |
+| 5 | Roadmap-Sektion | 2 Std | page.js |
+| 6 | FAQ-Akkordeon | 1 Std | page.js |
+| 7 | Waitlist-Formular | 1 Std | page.js |
+| 8 | Footer Optimierung | 1 Std | page.js |
+| 9 | Animationen & Interaktionen | 2 Std | Alle Seiten |
+
+---
+
+## 3. APPROACH OVERVIEW
+
+### 3.1 Implementierungs-Strategie
+Es wird ein inkrementeller Ansatz gewählt, bei dem jede Komponente unabhängig entwickelt und getestet werden kann:
+
+1. **Design-System zuerst**: CSS-Variablen ergänzen und Typografie definieren
+2. **Navigation dann**: Sticky Header + Mobile Drawer
+3. **Hero erweitern**: Badge + Dual CTAs + Animation
+4. **Features ergänzen**: 2 zusätzliche Cards + Status-Badges
+5. **Neue Sektionen**: Roadmap + FAQ + Waitlist
+
+### 3.2 Modularität
+Jedes Feature wird als eigenständige Komponente implementiert:
+- Navigation: Separate `NavBar.jsx` Komponente
+- Footer: Separate `Footer.jsx` Komponente
+- RoadMap: Separate `Roadmap.jsx` Komponente  
+- FAQ: Separate `FAQ.jsx` Komponente
+
+### 3.3 Alternative Ansätze (undwarum verworfen)
+
+- **Tailwind-only Styling**: ✗ Verworfen - Das bestehende Projekt nutzt bereits eine Mischung aus Tailwind und CSS-Variablen; Konsistenz ist wichtiger
+- **Separate Unterseiten für FAQ/Roadmap**: ✗ Verworfen - Alle Sektionen sollen on-page erreichbar sein ( SPA-Prinzip)
+- **Externe Animation Library (GSAP)**: ✗ Verworfen - Framer Motion ist bereits installiert und ausreichend
+
+---
+
+## 4. IMPLEMENTATION STEPS
+
+### Step 4.1: Design-System erweitern
+**Ziel**: Vollständiges Design-System mit allen notwendigen CSS-Variablen und Typografie definieren
+
+**Methode**: Die `/website/src/styles/globals.css` Datei um fehlende CSS-Variablen, Typography-Scale und Komponenten-Styles erweitern
+
+**Referenz**: `/website/src/styles/globals.css`
+
+**Konkrete Änderungen:**
+1. Fehlende CSS-Variablen hinzufügen:
+```css
+:root {
+  /* Primary palette (existing) */
+  --ice-blue: #00d4ff;
+  --deep-frost: #0a1628;
+  --glacial: #e8f4fc;
+  --cryo-glow: #00ffcc;
+  
+  /* New palette additions */
+  --color-bg: #050A14;
+  --color-surface: #0D1B2A;
+  --color-border: #1A2E44;
+  --color-secondary: #7C3AED;
+  --color-glow: rgba(0, 212, 255, 0.15);
+  --color-muted: #6B7A8D;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+}
+
+/* Typography Scale */
+--font-display: 'Space Grotesk', sans-serif;
+--font-body: 'Inter', sans-serif;
+
+/* Spacing System */
+--space-xs: 4px;
+--space-sm: 8px;
+--space-md: 16px;
+--space-lg: 24px;
+--space-xl: 32px;
+--space-2xl: 48px;
+--space-3xl: 64px;
+```
+
+2. Neue Button-Varianten:
+```css
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--ice-blue);
+  color: var(--glacial);
+}
+.btn-ghost:hover {
+  background: rgba(0, 212, 255, 0.1);
+}
+```
+
+3. Karussell-Karten-Stil:
+```css
+.card-glow {
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  transition: all 0.3s ease;
+}
+.card-glow:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 24px var(--color-glow);
+}
+```
+
+4. Badge-Stili:
+```css
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.badge-ready {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-success);
+}
+.badge-dev {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--color-warning);
+}
+.badge-planned {
+  background: rgba(107, 122, 141, 0.1);
+  color: var(--color-muted);
+}
+```
+
+5. Animation Keyframes:
+```css
+@keyframes scrollReveal {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(0, 212, 255, 0.6); }
+}
+
+@keyframes floatUpDown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+```
+
+---
+
+### Step 4.2: Navigation vollständig implementieren (inkl. Mobile)
+**Ziel**: Vollständig funktionsfähige Navigation mit Sticky-Behavior, Mobile Drawer und CTA
+
+**Methode**: Neue `Navigation`-Komponente erstellen und in `/page.js` importieren
+
+**Referenz**: `/website/src/app/page.js`
+
+**Konkrete Änderungen:**
+```jsx
+// Neue Nav-Komponente oder Erweiterung in page.js
+
+import { useState, useEffect } from 'react';
+import { Menu, X, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Navigation Links
+const navLinks = [
+  { name: 'Features', href: '#features' },
+  { name: 'Roadmap', href: '#roadmap' },
+  { name: 'Docs', href: '/docs' },
+  { name: 'Community', href: '#community' },
+];
+
+// State für Mobile Menu
+const [isScrolled, setIsScrolled] = useState(false);
+const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+// Scroll-Listener Effekt
+useEffect(() => {
+  const handleScroll = () => setIsScrolled(window.scrollY > 50);
+  window.addEventListener('scroll', handleScroll);
+  return () => window.removeEventListener('scroll', handleScroll);
+}, []);
+
+return (
+  <header className={`fixed top-0 w-full z-50 transition-all ${isScrolled ? 'glass py-3' : 'py-5'}`}>
+    {/* Scroll Progress Indicator */}
+    <div className="absolute bottom-0 left-0 w-full h-[2px] bg-[--surface]">
+      <motion.div 
+        className="h-full bg-gradient-to-r from-[--ice-blue] to-[--cryo-glow]"
+        style={{ scaleX: scrollProgress, transformOrigin: 'left' }}
+      />
+    </div>
+    
+    {/* Logo */}
+    <Link href="/" className="flex items-center gap-2">
+      <span className="text-xl font-bold gradient-text">CryOS</span>
+    </Link>
+    
+    {/* Desktop Nav Links */}
+    <nav className="hidden md:flex items-center gap-8">
+      {navLinks.map(link => (
+        <a key={link.name} href={link.href} className="text-sm text-[--glacial]/80 hover:text-[--ice-blue] transition-colors">
+          {link.name}
+        </a>
+      ))}
+    </nav>
+    
+    {/* CTA Button */}
+    <Link href="/downloads" className="btn btn-ghost text-sm hidden md:flex">
+      Get Early Access <ArrowRight size={16} className="ml-2" />
+    </Link>
+    
+    {/* Mobile Hamburger */}
+    <button 
+      className="md:hidden p-2"
+      onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+    >
+      {mobileMenuOpen ? <X /> : <Menu />}
+    </button>
+    
+    {/* Mobile Drawer */}
+    <AnimatePresence>
+      {mobileMenuOpen && (
+        <motion.div
+          initial={{ x: '100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '100%' }}
+          className="fixed inset-y-0 right-0 w-64 bg-[--deep-frost] border-l border-[--surface-light] p-6 md:hidden"
+        >
+          <nav className="flex flex-col gap-6 mt-16">
+            {navLinks.map(link => (
+              <a key={link.name} href={link.href} className="text-lg">
+                {link.name}
+              </a>
+            ))}
+          </nav>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </header>
+);
+```
+
+---
+
+### Step 4.3: Hero-Sektion erweitern
+**Ziel**: Erweiterte Hero-Sektion mit Badge, dualen CTAs, animiertem Hintergrund und Scroll-Down-Pfeil
+
+**Methode**: Die bestehende Hero-Sektion in `/page.js` erweitern
+
+**Referenz**: `/website/src/app/page.js` (Zeilen 92-142)
+
+**Konkrete Änderungen:**
+```jsx
+<section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+  {/* Animated Background Elements */}
+  <div className="absolute inset-0 pointer-events-none">
+    {/* Hexagon Grid Background - CSS oder Canvas */}
+    <div className="hex-grid-bg absolute inset-0 opacity-20" />
+    
+    {/* Radial Gradients */}
+    <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-[rgba(0,212,255,0.08)] blur-[100px] animate-pulse" />
+    <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-[rgba(124,58,237,0.08)] blur-[80px] animate-pulse delay-1000" />
+  </div>
+  
+  <div className="container relative z-10">
+    {/* Status Badge */}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[--surface] border border-[--ice-blue]/20 mb-8"
+    >
+      <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+      <span className="text-sm text-[--glacial]/80">LIVE BETA</span>
+      <span className="text-[--ice-blue]">•</span>
+      <span className="text-sm text-[--glacial]/60">Coming to Android 2026</span>
+    </motion.div>
+    
+    {/* Headline */}
+    <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight font-display">
+      Financial<br />
+      <span className="gradient-text">Sovereignty</span>
+      <br />in Your Pocket
+    </h1>
+    
+    {/* Description */}
+    <p className="text-xl text-[--glacial]/70 mb-10 max-w-xl mx-auto">
+      The first Web3-native operating system. Built from the ground up 
+      for decentralized finance. Your keys, your crypto, your rules.
+    </p>
+    
+    {/* Dual CTA Buttons */}
+    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+      <Link href="/downloads" className="btn btn-primary text-lg px-8 py-4 animate-glow-pulse">
+        Explore the Future <ArrowRight size={20} className="ml-2" />
+      </Link>
+      <button className="btn btn-secondary text-lg px-8 py-4 flex items-center gap-2">
+        <PlayCircle size={20} /> Watch Demo
+      </button>
+    </div>
+    
+    {/* Scroll Down Arrow */}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 1 }}
+      className="absolute bottom-8 left-1/2 -translate-x-1/2"
+    >
+      <a href="#features" className="flex flex-col items-center gap-2 text-[--glacial]/50 hover:text-[--ice-blue] transition-colors">
+        <span className="text-xs">Scroll</span>
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ repeat: Infinity, duration: 1.5 }}
+        >
+          <ChevronDown size={24} />
+        </motion.div>
+      </a>
+    </motion.div>
+  </div>
+</section>
+```
+
+---
+
+### Step 4.4: Feature-Cards erweitern (auf 6 erweitern)
+**Ziel**: Feature-Cards mit SVG-Icons, Titeln, Beschreibungen und Status-Badges erweitern
+
+**Methode**: Die bestehende Feature-Section in `/page.js` erweitern
+
+**Referenz**: `/website/src/app/page.js` (Zeilen 144-180)
+
+**KonkreteÄnderungen:**
+```jsx
+// Feature-Daten erweitern (6 statt 4)
+const features = [
+  {
+    icon: Shield,
+    title: 'Self-Sovereign Identity',
+    description: 'DID-based authentication that puts you in control. No corporate databases, no compromises.',
+    status: 'ready', // ✅ Ready
+  },
+  {
+    icon: Key,
+    title: 'Native Wallet',
+    description: 'Transaction signing at OS level. Hardware-secured, chain-native integration.',
+    status: 'ready', // ✅ Ready
+  },
+  {
+    icon: EyeOff,
+    title: 'Zero-Knowledge Security',
+    description: 'Proof-of-identity without revelation. Your data stays yours, forever.',
+    status: 'dev', // 🔧 In Development
+  },
+  {
+    icon: Cpu,
+    title: 'Adaptive Intelligence',
+    description: 'On-device AI that learns your patterns while keeping everything local.',
+    status: 'dev', // 🔧 In Development
+  },
+  {
+    icon: Wifi,
+    title: 'P2P Mesh Network',
+    description: 'Communication without central servers. True decentralization, end-to-end encrypted.',
+    status: 'planned', // 🗓 Planned
+  },
+  {
+    icon: Smartphone,
+    title: 'Mobile-First',
+    description: 'Starting with Android, built for all devices. Your OS, everywhere.',
+    status: 'ready', // ✅ Ready
+  },
+];
+
+// Badge Helper-Funktion
+const getStatusBadge = (status) => {
+  const badges = {
+    ready: { icon: '✓', label: 'Ready', className: 'badge-ready' },
+    dev: { icon: '🔧', label: 'In Dev', className: 'badge-dev' },
+    planned: { icon: '📅', label: 'Planned', className: 'badge-planned' },
+  };
+  return badges[status];
+};
+
+// In der Render-Schleife:
+{features.map((feature, i) => (
+  <motion.div
+    key={feature.title}
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    transition={{ delay: i * 0.1 }}
+    viewport={{ once: true }}
+    className="card-glow group p-6"
+  >
+    {/* Icon */}
+    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[--ice-blue]/20 to-[--cryo-glow]/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+      <feature.icon size={24} className="text-[--ice-blue]" />
+    </div>
+    
+    {/* Title */}
+    <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+    
+    {/* Description */}
+    <p className="text-sm text-[--glacial]/60 mb-4">{feature.description}</p>
+    
+    {/* Status Badge */}
+    <span className={`badge ${getStatusBadge(feature.status).className}`}>
+      {getStatusBadge(feature.status).icon} {getStatusBadge(feature.status).label}
+    </span>
+  </motion.div>
+))}
+```
+
+---
+
+### Step 4.5: Roadmap-Sektion hinzufügen
+**Ziel**: Vollständige Roadmap-Sektion mit Zeitstrahl-Layout und Animations hinzufügen
+
+**Methode**: Neue Roadmap-Sektion am Ende der Seite hinzufügen
+
+**Referenz**: `/website/src/app/page.js`
+
+**Konkrete Änderungen:**
+```jsx
+import { CheckCircle, Circle, Clock } from 'lucide-react';
+
+const roadmapPhases = [
+  {
+    quarter: 'Q3 2026',
+    title: 'Foundation',
+    items: ['DID Auth', 'Wallet Core', 'Android Beta'],
+    status: 'current',
+  },
+  {
+    quarter: 'Q4 2026',
+    title: 'Privacy Layer',
+    items: ['ZK-Proofs', 'Secure Enclave'],
+    status: 'planned',
+  },
+  {
+    quarter: 'Q1 2027',
+    title: 'Intelligence',
+    items: ['On-Device AI', 'Pattern Learning'],
+    status: 'planned',
+  },
+  {
+    quarter: 'Q2 2027',
+    title: 'Ecosystem',
+    items: ['P2P Comm', 'Multi-Device Sync'],
+    status: 'planned',
+  },
+];
+
+// Neue Sektion
+<section id="roadmap" className="py-20 bg-[--surface]/30">
+  <div className="container">
+    <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
+      Roadmap
+    </h2>
+    
+    {/* Timeline */}
+    <div className="relative">
+      {/* Vertical Line */}
+      <div className="absolute left-1/2 top-0 bottom-0 w-[2px] bg-[--surface-light] -translate-x-1/2 hidden md:block" />
+      
+      {/* Phases */}
+      <div className="space-y-12 md:space-y-0">
+        {roadmapPhases.map((phase, i) => (
+          <motion.div
+            key={phase.quarter}
+            initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className={`relative flex flex-col md:flex-row items-center gap-6 ${
+              i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
+            }`}
+          >
+            {/* Timing Circle on Line */}
+            <div className="absolute left-1/2 w-4 h-4 rounded-full bg-[--ice-blue] -translate-x-1/2 z-10 hidden md:block">
+              {phase.status === 'current' && (
+                <motion.div
+                  animate={{ scale: [1, 1.5, 1] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                  className="absolute inset-0 rounded-full bg-[--ice-blue]/30"
+                />
+              )}
+            </div>
+            
+            {/* Card */}
+            <div className={`flex-1 ${i % 2 === 0 ? 'md:pr-12' : 'md:pl-12'} text-${i % 2 === 0 ? 'right' : 'left'}`}>
+              <div className="card-glow p-6 inline-block">
+                <span className="text-sm text-[--ice-blue]">{phase.quarter}</span>
+                <h3 className="text-xl font-bold mt-1 mb-2">{phase.title}</h3>
+                <ul className="space-y-1">
+                  {phase.items.map(item => (
+                    <li key={item} className="text-sm text-[--glacial]/60 flex items-center gap-2">
+                      {phase.status === 'current' ? <CheckCircle size={14} className="text-[--cryo-glow]" /> : <Circle size={14} />}
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+```
+
+---
+
+### Step 4.6: FAQ-Akkordeon hinzufügen
+**Ziel**: FAQ-Sektion mit 6-8 Fragen als Akkordeon-Komponente hinzufügen
+
+**Methode**: Neue FAQ-Sektion hinzufügen mit Toggle-Funktionalität
+
+**Referenz**: `/website/src/app/page.js`
+
+**Konkrete Änderungen:**
+```jsx
+import { useState } from 'react';
+import { ChevronDown, Plus, Minus } from 'lucide-react';
+
+const faqItems = [
+  {
+    question: 'Welche Android-Version wird benötigt?',
+    answer: 'CryOS erfordert Android 14 oder höher für alle Sicherheitsfunktionen.',
+  },
+  {
+    question: 'Ist der Code Open Source?',
+    answer: 'Ja! Der Großteil von CryOS ist Open Source unter GPLv3. Einige sicherheitskritische Komponenten bleiben Closed Source.',
+  },
+  {
+    question: 'Wie funktioniert ZK-Proof im OS?',
+    answer: 'Zero-Knowledge Proofs werden hardwarebeschleunigt via Secure Enclave ausgeführt. Ihre sensiblen Daten verlassen niemals das Gerät.',
+  },
+  {
+    question: 'Kann ich meine bestehenden Wallets importieren?',
+    answer: 'Ja, Seed-Phrasen (24/12 Wörter) werden verschlüsselt im Vault gespeichert und sind mit Biometrie geschützt.',
+  },
+  {
+    question: 'Welche Blockchains werden unterstützt?',
+    answer: 'Initial: Ethereum, Polygon, BSC, Solana. Weitere Chains folgen inUpdates.',
+  },
+  {
+    question: 'Gibt es eine Tablet-Version?',
+    answer: 'Tablet-Optimierung ist für Q1 2027 geplant im Rahmen der Multi-Device-Sync Roadmap.',
+  },
+];
+
+// FAQ Component
+function FAQ() {
+  const [openIndex, setOpenIndex] = useState(null);
+  
+  return (
+    <section className="py-20">
+      <div className="container max-w-2xl">
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+          Frequently Asked Questions
+        </h2>
+        
+        <div className="space-y-3">
+          {faqItems.map((item, i) => (
+            <div key={i} className="card-glow overflow-hidden">
+              <button
+                onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                className="w-full flex items-center justify-between p-5 text-left"
+              >
+                <span className="font-medium">{item.question}</span>
+                {openIndex === i ? <Minus size={20} /> : <Plus size={20} />}
+              </button>
+              
+              <AnimatePresence>
+                {openIndex === i && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <p className="px-5 pb-5 text-[--glacial]/60">{item.answer}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+```
+
+---
+
+### Step 4.7: Waitlist-Newsletter hinzufügen
+**Ziel**: Newsletter/Waitlist-Formular mit E-Mail-Validierung hinzufügen
+
+**Methode**: Die bestehende Newsletter-Sektion erweitern
+
+**Referenz**: `/website/src/app/page.js` (Zeilen 223-245)
+
+**Konkrete Änderungen:**
+```jsx
+// State für Formular
+const [email, setEmail] = useState('');
+const [submitted, setSubmitted] = useState(false);
+const [loading, setLoading] = useState(false);
+
+// Submit Handler
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!email || !email.includes('@')) return;
+  
+  setLoading(true);
+  
+  // Hier: API-Call zu Mailchimp oder Resend
+  // const res = await fetch('/api/newsletter', {
+  //   method: 'POST',
+  //   body: JSON.stringify({ email }),
+  // });
+  
+  setTimeout(() => {
+    setSubmitted(true);
+    setLoading(false);
+  }, 1000);
+};
+
+// Ersetze Newsletter-Sektion:
+<section className="py-20">
+  <div className="container">
+    <div className="max-w-xl mx-auto text-center card-glow p-8">
+      {!submitted ? (
+        <>
+          <h3 className="text-2xl font-bold mb-4">Join the Waitlist</h3>
+          <p className="text-[--glacial]/60 mb-6">
+            Be among the first to experience financial sovereignty. 
+            Get early access and exclusive updates.
+          </p>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="input flex-1"
+              />
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="btn btn-primary whitespace-nowrap"
+              >
+                {loading ? 'Joining...' : 'Join Waitlist'}
+              </button>
+            </div>
+            
+            {/* DSGVOCheckbox */}
+            <label className="flex items-start gap-2 text-sm text-[--glacial]/50 cursor-pointer">
+              <input type="checkbox" required className="mt-1" />
+              <span>I agree to the privacy policy and allow CryOS to contact me.</span>
+            </label>
+          </form>
+        </>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
+        >
+          <div className="w-16 h-16 rounded-full bg-[--cryo-glow]/20 flex items-center justify-center mx-auto mb-4">
+            <CheckCircle size={32} className="text-[--cryo-glow]" />
+          </div>
+          <h3 className="text-xl font-bold text-[--cryo-glow]">You're on the list!</h3>
+          <p className="text-[--glacial]/60 mt-2">We'll notify you when CryOS is ready.</p>
+        </motion.div>
+      )}
+    </div>
+  </div>
+</section>
+```
+
+---
+
+### Step 4.8: Footer optimieren
+**Ziel**: Vollständiger optimierter Footer mit allen notwendigen Spalten und Social Icons
+
+**Methode**: Den bestehenden Footer in `/page.js` erweitern
+
+**Referenz**: `/website/src/app/page.js` (Zeilen 247-299)
+
+**Konkrete Änderungen:**
+```jsx
+import { Github, Twitter, MessageCircle, Send, ExternalLink } from 'lucide-react';
+
+// Footer Links erweitern
+const footerLinks = {
+  product: [
+    { name: 'Features', href: '#features' },
+    { name: 'Roadmap', href: '#roadmap' },
+    { name: 'Docs', href: '/docs' },
+    { name: 'Downloads', href: '/downloads' },
+  ],
+  community: [
+    { name: 'Discord', href: '#', icon: MessageCircle },
+    { name: 'GitHub', href: '#', icon: Github },
+    { name: 'Twitter', href: '#', icon: Twitter },
+    { name: 'Telegram', href: '#', icon: Send },
+  ],
+  legal: [
+    { name: 'Privacy Policy', href: '#' },
+    { name: 'Terms of Service', href: '#' },
+    { name: 'Impressum', href: '#' },
+  ],
+};
+
+// Optimierter Footer
+<footer className="py-12 border-t border-[--surface-light]/30">
+  <div className="container">
+    <div className="grid md:grid-cols-4 gap-8 mb-8">
+      {/* Logo & Beschreibung */}
+      <div>
+        <Link href="/" className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[--ice-blue] to-[--cryo-glow]" />
+          <span className="text-xl font-bold">CryOS</span>
+        </Link>
+        <p className="text-sm text-[--glacial]/50">
+          Financial sovereignty in your pocket. Your keys, your crypto, your rules.
+        </p>
+        <p className="text-xs text-[--glacial]/30 mt-4">
+          © 2026 CryOS Foundation.<br />Built in Hagen, DE 🇩🇪
+        </p>
+      </div>
+      
+      {/* Product Spalte */}
+      <div>
+        <h4 className="font-semibold mb-4">Product</h4>
+        <div className="space-y-2 text-sm text-[--glacial]/60">
+          {footerLinks.product.map(link => (
+            <Link key={link.name} href={link.href} className="block hover:text-[--ice-blue]">
+              {link.name}
+            </Link>
+          ))}
+        </div>
+      </div>
+      
+      {/* Community Spalte */}
+      <div>
+        <h4 className="font-semibold mb-4">Community</h4>
+        <div className="space-y-2 text-sm">
+          {footerLinks.community.map(link => (
+            <a 
+              key={link.name} 
+              href={link.href} 
+              className="flex items-center gap-2 hover:text-[--ice-blue] transition-colors"
+            >
+              <link.icon size={16} />
+              {link.name}
+              <ExternalLink size={12} className="opacity-50" />
+            </a>
+          ))}
+        </div>
+      </div>
+      
+      {/* Legal Spalte */}
+      <div>
+        <h4 className="font-semibold mb-4">Legal</h4>
+        <div className="space-y-2 text-sm text-[--glacial]/60">
+          {footerLinks.legal.map(link => (
+            <Link key={link.name} href={link.href} className="block hover:text-[--ice-blue]">
+              {link.name}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+```
+
+---
+
+### Step 4.9: Animationen und Interaktionen hinzufügen
+**Ziel**: Scroll-Reveal, Hover-Effekte und Mikrogeräub hinzufügen
+
+**Methode**: Framer Motion + CSS-Animationen nutzen
+
+**Konkrete Änderungen:**
+
+1. **Scroll-Reveal Wrapper** (wiederverwendbare Komponente):
+```jsx
+'use client';
+import { motion } from 'framer-motion';
+
+export function ScrollReveal({ children, delay = 0, className = '' }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-100px' }}
+      transition={{ duration: 0.5, delay, ease: 'easeOut' }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+```
+
+2. **Counter-Animation fürStats-Sektion**:
+```jsx
+// Bereits vorhanden, aber erweitern für besseren Effekt:
+// Stat Value Animation mit Count-Up
+import { useCountUp } from 'use-count-up';
+
+function AnimatedCounter({ end, suffix = '' }) {
+  const { value } = useCountUp({
+    end,
+    duration: 2,
+    easing: 'easeOut',
+  });
+  
+  return <span>{value}{suffix}</span>;
+}
+```
+
+3. **Roadmap-Linien-Animation**:
+```jsx
+// SVG stroke-dashoffset Animation
+<motion.svg
+  initial={{ strokeDashoffset: 1000 }}
+  whileInView={{ strokeDashoffset: 0 }}
+  transition={{ duration: 1.5 }}
+>
+  <path d="..." className="stroke-[--ice-blue]" />
+</motion.svg>
+```
+
+---
+
+### Step 4.10: SEO & Meta Tags prüfen/ergänzen
+**Ziel**: Vollständige SEO-Ausstattung sicherstellen
+
+**Methode**: Die `/layout.js` prüfen und falls nötig ergänzen
+
+**Referenz**: `/website/src/app/layout.js`
+
+**Konkrete Änderungen:**
+Die Metadata sind bereits gutbestückt. Kleinere Ergänzungen:
+
+```javascript
+export const metadata = {
+  // ... already present ...
+  
+  // Additional for Rich Results
+  structuredData: {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    'name': 'CryOS',
+    'operatingSystem': 'Android, Linux',
+    'applicationCategory': 'FinanceApplication',
+    'offers': {
+      '@type': 'Offer',
+      'price': '0',
+      'priceCurrency': 'USD',
+    },
+  },
+  
+  // Additional OpenGraph for-sharing
+  alternates: {
+    canonical: 'https://cryos.io',
+    languages: {
+      'en-US': 'https://cryos.io',
+      'de-DE': 'https://cryos.io/de',
+    },
+  },
+};
+```
+
+---
+
+## 5. TESTING AND VALIDATION
+
+### 5.1 Visuelle Prüfung (Manual Verification)
+
+| Prüfpunkt | Erwartetes Ergebnis | Status |
+|-----------|---------------------|--------|
+| Navigation | Sticky Header mit Logo-Link, Nav-Links, CTA-Button sichtbar | ☐ |
+| Mobile Menu | Hamburger zeigt Menuoverlay bei Klick | ☐ |
+| Scroll Progress | Dünne animierte Linie unter Header beim Scrollen | ☐ |
+| Hero Badge | "LIVE BETA • Coming to Android 2026" Badge sichtbar | ☐ |
+| Hero CTAs | Zwei Buttons: "Explore the Future" + "Watch Demo" | ☐ |
+| Scroll Arrow | Animierter Pfeil nach unten | ☐ |
+| Feature Cards | 6 Cards mit Icons, Titeln, Badges | ☐ |
+| Hover Effects | Glow-Effekt bei Maus über Cards | ☐ |
+| Roadmap | Zeitstrahl mit 4 Phasen | ☐ |
+| FAQ | Accordion öffnet/schließt bei Klick | ☐ |
+| Waitlist Form | E-Mail-Eingabe + Submit + Erfolgsmeldung | ☐ |
+| Footer | 4 Spalten + Social Icons | ☐ |
+| Responsive | Alles funktioniert auf Mobile (<768px) | ☐ |
+
+### 5.2 Funktionale Prüfung
+
+| Prüfpunkt | Test-Methode | Erfolgskriterium |
+|----------|--------------|------------------|
+| Form Validation | Leeren Submit versuchen | Fehlermeldung erscheint |
+| Form Submission |valide E-Mail eingeben | "Du bist auf der Liste" Meldung |
+| Mobile Menu | Auf Mobile öffnen/schließen | Menu öffnet u. schließt korrekt |
+| FAQ Toggle | Mehrere FAQs nacheinander öffnen | Nur eine zur Zeit offen |
+| Scroll Reveal | Nach unten scrollen | Elemente erscheinen mit Fade-In |
+| External Links | Auf Footer-Links klicken | Links funktionieren |
+
+### 5.3 Performance-Prüfung (Optional)
+
+| Metrik | Zielwert | Messung |
+|-------|----------|---------|
+| Lighthouse Performance | >90 | lighthouse cli |
+| First Contentful Paint | <1.5s | Chrome DevTools |
+| Time to Interactive | <3s | Chrome DevTools |
+| Cumulative Layout Shift | <0.1 | Chrome DevTools |
+
+### 5.4 Browser-Kompatibilität
+
+| Browser | Version | Getestet |
+|---------|---------|----------|
+| Chrome | Latest | ☐ |
+| Firefox | Latest | ☐ |
+| Safari | Latest | ☐ |
+| Edge | Latest | ☐ |
+
+---
+
+## 6. IMPLEMENTIERUNGS-REIHENFOLGE (SPRINT-ÜBERSICHT)
+
+| Sprint | Arbeitspaket |Geschätzte Zeit | Abhängigkeiten |
+|--------|--------------|------------------|----------------|
+| 1 | Design-System (CSS-Variablen + Styles) | 2 Std | globals.css |
+| 2 | Navigation + Mobile Menu | 2 Std | Step 1 |
+| 3 | Hero-Sektion erweitern | 1.5 Std | Step 1 |
+| 4 | Feature-Cards (6 Cards + Badges) | 2 Std | Step 1, Step 3 |
+| 5 | Roadmap-Sektion | 2 Std | Step 1 |
+| 6 | FAQ-Accordion | 1.5 Std | Step 1 |
+| 7 | Waitlist-Formular optimieren | 1 Std | Step 1 |
+| 8 | Footer optimieren | 1 Std | Step 1 |
+| 9 | Animationen (Scroll-Reveal, etc.) | 2 Std | Steps 2-8 |
+| 10 | Testing + Bugfixes | 2 Std | Alle Steps |
+
+**Gesamt: ~17 Stunden (ca. 2-3 Tage bei 8-Stunden-Arbeitstag)**
+
+---
+
+## 7. RISIKEN UND HERAUSFORDERUNGEN
+
+### 7.1 Potentielle Issues
+
+| Risiko | Wahrscheinlichkeit | Auswirkung | Mitigation |
+|-------|-------------------|-----------|------------|
+| Framer Motion Konflikte mit Tailwind | Mittel | Low | Explizite `className` Props nutzen |
+| Mobile Menu z-index Konflikte | Mittel | Medium | Höheren z-index setzen |
+| Lange Ladezeiten durch zu viele SVGs | Niedrig | High | SVGs lazy-laden |
+| Schriftarten nicht ladbar | Niedrig | Medium | Fallback-Schriften definieren |
+
+### 7.2 Annahmen
+
+1. **Next.js + Framer Motion** bleibt der Stack - keine Umstellung auf andere Libraries
+2. **TailwindCSS** wird weiter genutzt für Responsive/Layout
+3. **Die bestehenden Components und Struktur** bleibt erhalten - keine Refaktors
+4. **Keine Backend-Integration** für jetzt - nur UI/UX (Formular zeigt nur Mock-Erfolg)
 
 ## 1.1 Geplante Hauptkomponenten
 
