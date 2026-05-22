@@ -1,4 +1,7 @@
 # 1. OBJECTIVE
+# CryOS Website Deployment Fix Plan
+
+## FIX OBJECTIVE: Clean up workflow configs and ensure accurate npm build for all website routes
 
 Entwicklung eines vollständigen Web3-nativen Betriebssystem-Ökosystems (CryOS) für Desktop und Mobile Umgebungen. Das System soll dezentrale Identität, native Blockchain-Integration, Zero-Knowledge Sicherheitsarchitektur und eine KI-gestützte adaptive Benutzeroberfläche bieten. Das finale Produkt ist ein vollständiges Betriebssystem, das finanzielle Souveränität direkt im Kernel verankert.
 
@@ -146,74 +149,53 @@ Phase 6 (2028+) ───────────► Maturity & DAO
 
 # 4. IMPLEMENTATION STEPS
 
-Jede Phase enthält mehrere Deliverables mit geschätzten Aufwänden.
+## Step 4.1: Verify npm dependency installation
+- **Goal**: Confirm all packages installed correctly 
+- **Method**: Check `/workspace/project/Cey/workspace/node_modules/` exists with packages
+- **Reference**: `/workspace/project/Cey/workspace/package.json`
+- **Verification**: Directory should have several hundred subdirectories (node_modules packages)
 
----
+## Step 4.2: Verify website build output exists  
+- **Goal**: Ensure Next.js app was previously built successfully
+- **Method**: Check `/workspace/project/Cey/workspace/out/` directory for static files
+- **Reference**: `/workspace/project/Cey/workspace/out/index.html`, next.config.js
+- **Expected**: index.html shows actual page content (CryOS landing page)
 
-## Phase 0: Foundation (Q3 2026)
+## Step 4.3: Audit GitHub workflow configurations  
+- **Goal**: Confirm the two GitHub Actions workflows are correctly configured
+- **Method**: Review `.github/workflows/pages.yml` AND `.github/workflows/ci.yml`
+- **Current Status**:
+  - `/workspace/project/Cey/.github/workflows/pages.yml`: Correctly sets working-directory: workspace, npm install + build → ./workspace/out ✓
+  - `/workspace/project/Cey/.github/workflows/ci.yml`: Target the root-level hardhat project (separate from website) - OK
 
-**Ziel**: Grundsteinlegung - Website, Testnet, Whitepaper Veröffentlichung
+## Step 4.4: Test website runs in development mode (optional verification)  
+- **Goal**: Additional check - verify devserver functions
+- **Method**: Can test via `npm run dev` from /workspace/project/Cey/workspace/ if needed
 
-### Step 0.1: CryoHQ Website erstellen
-- **Methode**: Next.js/React mit Frost UI Design Language
-- **Deliverable**: Vollständige CryoHQ Website mit allen Assets und professionellen Funktionen
-- **Aufwand**: 4-6 Wochen
-- **Referenz**: /website, /public
+## Step 4.5: Ensure package.json scripts are compatible with npm and GitHub Pages
+- **Goal**: Verify scripts in package.json will work in CI pipeline
+- **Method**: Read package.json and confirm all standard scripts exist (dev, build, start, lint)
 
-**Website Struktur & Features:**
+# 5. TESTING AND VALIDATION
 
-| Sektion | Features | Priority |
-|--------|----------|----------|
-| **Downloads** | APK Downloads, ISO Images, SDK Packages, Version History, Update Notifications | HIGH |
-| **Info / About** | Team Page, Company Info, Mission Statement, Press Kit, Media Assets | HIGH |
-| **Contact** | Contact Form, Support Ticket System, Email Integration, Social Links | HIGH |
-| **Login / Auth** | User Authentication, OAuth (Google, GitHub, Wallet Connect), Session Management | HIGH |
-| **Engine / Dashboard** | User Dashboard, Wallet Connection, Token Balance, Transaction History | HIGH |
-| **Purchases** | Token Purchase (ICO/IDO), Merchandise Shop, Premium Features, Payment Gateway Integration | MEDIUM |
-| **Blog / News** | Blog Posts, Announcements, Changelog, Newsletter Subscription | MEDIUM |
-| **Documentation** | API Docs, Quick Start Guide, FAQ, Community Forum Link | MEDIUM |
+## 5.1 Dependency Verification
+- [ ] `/workspace/project/Cey/workspace/node_modules/` exists (>200 subdirectories)
+- [ ] All main packages from package.json present (next, react, tailwindcss, etc.)
 
-**Technische Features:**
+## 5.2 Build Output Verification
+- [ ] `/workspace/project/Cey/workspace/out/index.html` exists 
+- [ ] Contains expected CryOS landing page content ("Financial Sovereignty")
+- [ ] _next/ folder exists with static assets (JS chunks, CSS files)
 
-- **Asset Management:**
-  - CDN für Downloads (APK, ISO, SDK)
-  - Versionierung und Hash-Verifikation
-  - automatische Update-Checks
-  - Download-Analytics
+## 5.3 Workflow Verification
+- [ ] `pages.yml` contains correct working-directory path
+- [ ] `pages.yml` uploads artifact from `./workspace/out`
+- [ ] `ci.yml` runs separately for root hardhat tests (does NOT conflict)
 
-- **Authentication System:**
-  - Wallet Connect Integration (ETH, SOL, WalletConnect v2)
-  - OAuth (Google, GitHub, Discord)
-  - JWT Session Management
-  - 2FA Support (TOTP)
-  - Password Reset Flow
-
-- **Purchase Engine:**
-  - Token Sale Smart Contract (ICO/IDO/Public Sale)
-  - Fiat Payment Gateway (Stripe, MoonPay)
-  - Order Management System
-  - Invoice Generation
-  - KYC/AML Integration Ready
-
-- **User Dashboard:**
-  - Wallet Portfolio View
-  - Token Balance Display (CRX, ETH, BTC, etc.)
-  - Transaction History
-  - NFT Gallery
-  - Governance Voting Interface
-  - Notification Preferences
-
-- **Contact & Support:**
-  - Ticketing System (Frontmatter)
-  - Knowledge Base
-  - AI Chatbot (Cryo Mind Integration)
-  - Community Discord Link
-
-### Step 0.1.1: Website Frontend (Next.js)
-- **Methode**: Next.js 14 mit TypeScript, Tailwind CSS
-- **Deliverable**: Responsive Pages, Components, Animations
-- **Aufwand**: 2-3 Wochen
-- **Referenz**: /website/src/app
+## 5.4 Package.json Compatibility
+- [ ] Has `"build": "next build"` script  
+- [ ] Has `"dev": "next dev"` script
+- [ ] Private flag set to true (prevents accidental npm publish)
 
 ```
 /website
