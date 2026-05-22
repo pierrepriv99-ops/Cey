@@ -86,6 +86,33 @@ Join us building the future of decentralized computing:
 4. Push to the branch
 5. Open a Pull Request
 
+## 🔧 Local Development
+
+### Static Site (Root)
+
+The landing page at `/workspace/index.html` is now modular. To run locally:
+
+```bash
+# Using Python (recommended)
+cd /workspace
+python -m http.server 8000
+
+# Using Node.js
+npx serve .
+```
+
+Then visit `http://localhost:8000`
+
+### Next.js App
+
+```bash
+cd website
+npm install
+npm run dev
+```
+
+Then visit `http://localhost:3000`
+
 ## ⚠️ Disclaimer
 
 This is experimental software. Use at your own risk. Cryptocurrencies involve risk - never invest more than you can afford to lose.

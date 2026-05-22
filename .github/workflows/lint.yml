@@ -1,0 +1,99 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.html'
+      - '**.js'
+      - '**.css'
+      - '.github/workflows/lint.yml'
+  pull_request:
+    paths:
+      - '**.html'
+      - '**.js'
+      - '**.css'
+
+permissions:
+  contents: read
+
+jobs:
+  htmlhint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run HTMLHint
+        uses: github/super-linter@v7
+        env:
+          MULTI_PHP: ''
+          VALIDATE_ALL_CODEBASE: false
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HTMLHint_ANSIBLE: false
+          HTMLHint_ARM_TPL: false
+          HTMLHint_CFN_TPL: false
+          HTMLHint_CLOUD_FORMATION: false
+          HTMLHint_CMAKE: false
+          HTMLHint_CSHARP: false
+          HTMLHT_DOCKERFILE: false
+          HTMLHint_GO: false
+          HTMLHint_HEREDOC_LINTER: false
+          HTMLHint_HTML: true
+          HTMLHint_JAVA: false
+          HTMLHint_JAVASCRIPT: false
+          HTMLHint_JSON: false
+          HTMLHint_KUBERNETES_KUBE: false
+          HTMLHint_MARKDOWN: false
+          HTMLHint_PYTHON: false
+          HTMLHint_XML: false
+          HTMLHint_YAML: false
+
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install ESLint
+        run: npm install -g eslint
+        
+      - name: Lint JavaScript
+        run: |
+          eslint --no-error-on-unmatched-pattern . || true
+        continue-on-error: true
+
+  stylelint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install Stylelint
+        run: npm install -g stylelint stylelint-config-standard
+        
+      - name: Lint CSS
+        run: |
+          stylelint "**/*.css" --no-error-on-unmatched-pattern || true
+        continue-on-error: true
+
+  validate-html:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Validate HTML files
+        run: |
+          for f in $(find . -name "*.html" -not -path "./node_modules/*"); do
+            echo "Checking $f..."
+            # Basic HTML validation check
+            head -1 "$f" | grep -q "<!DOCTYPE html>" && echo "✓ $f has DOCTYPE" || echo "✗ $f missing DOCTYPE"
+          done

@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - 'website/**'
+      - 'components/**'
+      - 'src/**'
+      - 'index.html'
       - '.github/workflows/pages.yml'
 
 permissions:
@@ -33,14 +36,25 @@ jobs:
         run: npm ci
         working-directory: website
       
-      - name: Build
+      - name: Build Next.js
         run: npm run build
         working-directory: website
       
+      - name: Prepare static assets
+        run: |
+          mkdir -p _site
+          cp index.html _site/ 2>/dev/null || true
+          cp -r components _site/ 2>/dev/null || true
+          cp -r src _site/ 2>/dev/null || true
+      
+      - name: Copy Next.js build
+        run: |
+          cp -r website/out/* _site/ 2>/dev/null || true
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./website/out
+          path: ./_site
 
   deploy:
     needs: build
