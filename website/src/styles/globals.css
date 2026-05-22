@@ -8,6 +8,29 @@
   --surface: #1a2942;
   --surface-light: #243652;
   --surface-lighter: #2d3f5c;
+  
+  /* New palette additions per user specification */
+  --color-bg: #050A14;
+  --color-surface: #0D1B2A;
+  --color-border: #1A2E44;
+  --color-secondary: #7C3AED;
+  --color-glow: rgba(0, 212, 255, 0.15);
+  --color-muted: #6B7A8D;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  
+  /* Typography Scale */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  
+  /* Spacing System */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
 }
 
 * {
@@ -79,6 +102,78 @@ button {
 
 .btn-ghost:hover {
   background: var(--surface);
+}
+
+/* Button variants */
+.btn-violet {
+  background: var(--color-secondary);
+  color: white;
+}
+
+.btn-violet:hover {
+  background: #8b5cf6;
+  transform: translateY(-1px);
+}
+
+/* Card glow style */
+.card-glow {
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  transition: all 0.3s ease;
+}
+
+.card-glow:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 24px var(--color-glow);
+}
+
+/* Badge styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-ready {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-success);
+}
+
+.badge-dev {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--color-warning);
+}
+
+.badge-planned {
+  background: rgba(107, 122, 141, 0.1);
+  color: var(--color-muted);
+}
+
+/* Animation keyframes */
+@keyframes scrollReveal {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(0, 212, 255, 0.6); }
+}
+
+@keyframes floatUpDown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-scroll-reveal {
+  animation: scrollReveal 0.6s ease-out forwards;
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 2s ease-in-out infinite;
 }
 
 /* Card */
