@@ -1,4 +1,7 @@
 # 1. OBJECTIVE
+---
+title: CryOS Material Design 3 Redesign
+---
 # CryOS Website Deployment Fix Plan
 
 ## FIX OBJECTIVE: Clean up workflow configs and ensure accurate npm build for all website routes
