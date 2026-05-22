@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { 
   Smartphone, Shield, Zap, Globe, Users, 
   ChevronRight, Download, Wallet, MessageSquare,
-  ArrowRight, Github, Twitter, Discord
+  ArrowRight, Github, Twitter
 } from 'lucide-react';
 
 // Navigation
@@ -277,7 +277,7 @@ export default function HomePage() {
                   <Twitter size={16} /> Twitter
                 </a>
                 <a href="#" className="flex items-center gap-2 hover:text-[--ice-blue]">
-                  <Discord size={16} /> Discord
+                  <span>Discord</span>
                 </a>
               </div>
             </div>
