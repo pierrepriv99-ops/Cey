@@ -3,5 +3,19 @@
   "version": "0.1.0",
   "description": "CryOS Web3 SDK",
   "main": "dist/index.js",
-  "type": "module"
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": ["cryos", "web3", "blockchain", "sdk"],
+  "dependencies": {
+    "ethers": "^6.10.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "author": "CryOS Team",
+  "license": "MIT"
 }

@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-CryOS is a Web3-native operating system project with multi-phase development roadmap. Current codebase covers Phases 0-5 with various deliverables.
+CryOS is a Web3-native operating system project with multi-phase development roadmap. Current codebase covers Phases 0-6 with various deliverables.
 
 ---
 
@@ -12,56 +12,80 @@ CryOS is a Web3-native operating system project with multi-phase development roa
 - [x] CryoHQ Website (`/website`) - Next.js with Frost UI Design
 - [x] CRX Token Smart Contract (`/contracts/CRXToken.sol`)
 - [x] Documentation (`/docs/`)
+- [x] Cross-Chain Bridge (`/bridge/CrossChain.sol`)
 
 ### Phase 1: Mobile Alpha ✅ PARTIAL  
 - [x] Android Launcher (`/mobile/launcher/`)
-- [ ] Vault (Secure Enclave Integration) - skeleton
-- [x] Wallet SDK (`/mobile/wallet/`) - multi-chain
+- [x] Vault (KeyStore) (`/mobile/vault/KeyStoreService.java`)
+- [x] Wallet SDK (`/mobile/wallet/WalletSDK.java`)
 
 ### Phase 2: Chain Layer ✅ PARTIAL
 - [x] CRX Token (ERC-20)
-- [ ] On-Chain App Store - partial (`/contracts/CryoStore.sol`)
-- [ ] Developer SDK - placeholder
+- [x] On-Chain App Store (`/contracts/CryoStore.sol`)
+- [x] DID Registry (`/identity/DIDRegistry.sol`)
+- [x] SDK (`/sdk/`) - TypeScript
 
 ### Phase 3: Network Layer ✅ PARTIAL
 - [x] P2P Message Protocol (`/network/src/message.js`)
 - [x] NAT Traversal (`/network/src/nat.js`)
-- [ ] Notifications - not implemented
+- [x] Network Bootstrap (`/network/src/index.js`)
 
 ### Phase 4: Desktop (Station) ✅ PARTIAL
 - [x] Electron Desktop App Skeleton (`/desktop/`)
 - [ ] Window Manager - not implemented
 - [ ] Cross-Device Sync - not implemented
 
-### Phase 5: Mind (AI Layer) ✅ PARTIAL
+### Phase 5: Mind (AI Layer) ✅ PROTOTYPE
 - [x] AI Shell (`/mind/src/index.js`)
 - [x] Agent System (`/mind/src/agent.js`)
 - [x] Intent Recognition (`/mind/commands/intent.sh`)
-- [ ] Ghost Agent - placeholder
-- [ ] Natural Language Terminal - partial
+- [ ] Production LLM Integration - placeholder
 
-### Phase 6: Maturity - NOT STARTED
-- [ ] CRX DAO Governance
-- [ ] Hardware Program
-- [ ] Enterprise Tier
+### Phase 6: Maturity ✅ PARTIAL
+- [x] DAO Governance (`/governance/dao/CryOSDao.sol`)
+- [x] Voting (`/governance/Voting.sol`)
+- [x] Grants Program (`/governance/grants/GrantProgram.sol`)
+- [x] Multisig (`/governance/multisig/GovernanceCore.sol`)
+- [ ] Enterprise Tier - placeholder
 
 ---
 
 ## Package Status
 
-| Package | Path | Status |
-|---------|------|--------|
-| Contracts | `/contracts/` | ✅ Functional |
-| Website | `/website/` | ✅ GitHub Pages Ready |
-| Mobile | `/mobile/` | ⚠️ Android Skeleton |
-| Desktop | `/desktop/` | ⚠️ Electron Skeleton |
-| Network | `/network/` | ✅ P2P Core |
-| Mind | `/mind/` | ⚠️ AI Shell (Mock) |
+| Package | Path | Status | Notes |
+|---------|------|--------|-------|
+| Contracts | `/contracts/` | ✅ Functional | ERC-20, Store |
+| Website | `/website/` | ✅ GitHub Pages Ready | 8 static pages |
+| Mobile | `/mobile/` | ✅ Android Skeleton | Launcher, Vault, Wallet |
+| Desktop | `/desktop/` | ⚠️ Electron Skeleton | Electron app |
+| Network | `/network/` | ✅ P2P Core | Messaging, NAT |
+| Mind | `/mind/` | ⚠️ AI Shell Prototype | Mock AI |
+| SDK | `/sdk/` | ✅ Base | TypeScript |
+| Addons | `/addons/` | ⚠️ Design System | Package ready |
+| Extensions | `/extensions/` | ✅ Plugin Architecture | Package ready |
+| Futures | `/futures/` | ✅ Feature API | Package ready |
+| Governance | `/governance/` | ✅ DAO Core | Voting, Grants, Multisig |
+| Identity | `/identity/` | ✅ DID Registry | ERC-1056 |
+| Bridge | `/bridge/` | ✅ Cross-Chain | Uniswap-style |
+
+---
+
+## Build & Test
+
+```bash
+# Smart contracts
+npx hardhat compile
+npx hardhat test
+
+# Website
+cd website && npm run build
+
+# Network/mind (Node.js)
+cd network && npm install
+cd mind && npm install
+```
 
 ---
 
 ## Last Updated
 2026-05-22
-
-## Roadmap Alignment
-Project follows the 6-phase development strategy with bottom-up architecture. Security foundations (Cryo Vault) in place, blockchain integration via ERC-20 token, AI layer in prototype phase.
